@@ -1,0 +1,28 @@
+meta {
+  name: Added_Account4_To_HouseholdMember2
+  type: http
+  seq: 12
+}
+
+patch {
+  url: http://localhost:8080/api/householdMember/2/addAccount?household=1
+  body: json
+  auth: inherit
+}
+
+params:query {
+  household: 1
+}
+
+body:json {
+  {
+      "name": "Girokonto",
+      "balance": 3000.0,
+      "currency": "EUR"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

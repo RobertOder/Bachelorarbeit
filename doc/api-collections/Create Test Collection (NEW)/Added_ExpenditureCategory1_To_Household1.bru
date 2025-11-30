@@ -1,0 +1,23 @@
+meta {
+  name: Added_ExpenditureCategory1_To_Household1
+  type: http
+  seq: 24
+}
+
+patch {
+  url: http://localhost:8080/api/household/1/addExpenditureCategory
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Lebensmittel",
+      "upperLimit": 150.0
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

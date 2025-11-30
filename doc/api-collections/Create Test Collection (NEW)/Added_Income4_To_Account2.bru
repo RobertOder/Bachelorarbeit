@@ -1,0 +1,27 @@
+meta {
+  name: Added_Income4_To_Account2
+  type: http
+  seq: 16
+}
+
+patch {
+  url: http://localhost:8080/api/account/2/addIncome
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "date": "2025-01-22",
+      "amount": 9000.0,
+      "currency": "EUR",
+      "recurring": false,
+      "recurringInterval": null,
+      "description": "Höffner - Gutschrift"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

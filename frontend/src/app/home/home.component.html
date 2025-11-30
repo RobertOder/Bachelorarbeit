@@ -1,0 +1,44 @@
+<!--
+<main>
+    <article>
+        <h2>This is the home page!</h2>
+        <ul class="householdMembers">
+            <li *ngFor="let householdMember of householdMembers">
+                <span class="badge">ID: {{householdMember.id}}</span> - Name: {{householdMember.name}}, {{householdMember.firstname}}
+                <button type="button" class="delete" title="delete householdMember" (click)="delete(householdMember)">x</button>
+            </li>
+        </ul>
+    </article>
+</main>
+-->
+<main>
+    <article>
+        <h2>{{title}}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Vorname</th>
+                    <th>Name</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let householdMember of householdMembers">
+                    <td>{{householdMember.id}}</td>
+                    <td>{{householdMember.firstname}}</td>
+                    <td>{{householdMember.name}}</td>
+                    <td>
+                        <button type="button" class="update" title="Benutzerdaten bearbeiten" (click)="updateHouseholdMember(householdMember)">Benutzer</button>
+                        <button type="button" class="addHousehold" title="Haushalte bearbeiten" (click)="addHousehold(householdMember)">Haushalte</button>
+                        <button type="button" class="addExpenditureCategory" title="Ausgaben-Kategorien bearbeiten" (click)="addExpenditureCategory(householdMember)">Ausgaben-Kategorien</button>
+                        <button type="button" class="addAccount" title="Konten bearbeiten" (click)="addAccount(householdMember)">Konten</button>
+                        <button type="button" class="addIncome" title="Einnahme hinzufügen" (click)="addIncome(householdMember)">Einnahme hinzufügen</button>
+                        <button type="button" class="addExpenditure" title="Ausgabe hinzufügen" (click)="addExpenditure(householdMember)">Ausgabe hinzufügen</button>
+                        <button type="button" class="getExpenditures" title="Ausgaben bearbeiten" (click)="showExpenditures(householdMember)">Ausgaben</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</main>

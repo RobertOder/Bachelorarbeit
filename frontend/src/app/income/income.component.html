@@ -1,0 +1,30 @@
+<main>
+    <article>
+        <h2>{{householdMember.firstname}} {{householdMember.name}} > Einnahme speichern</h2>
+        <form>
+            <fieldset>
+              <legend>Einnahme anlegen</legend>
+              <div>
+                <label for="amount">Einnahme in €: </label>
+                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="1" required [(ngModel)]="income.amount">
+              </div>
+              <div>
+                <label for="description">Beschreibung: </label>
+                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Taschendgeld" tabindex="2" required [(ngModel)]="income.description">
+              </div>
+              <div>
+                <label for="household">Auf Konto buchen: </label>
+                <select #accountSelectId >
+                  <option *ngFor="let account of accounts" [value]="account.id">
+                      {{account.id}} - {{account.name}}
+                  </option>
+              </select>
+              </div>
+            </fieldset>
+            <div>
+                <input type="reset">
+                <input type="submit" (click)="add(income, accountSelectId.value)">
+            </div>
+          </form>
+    </article>
+</main>

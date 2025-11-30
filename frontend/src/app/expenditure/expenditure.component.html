@@ -1,0 +1,64 @@
+<main>
+    <article>
+        <h2>{{householdMember.firstname}} {{householdMember.name}} > Ausgabe speichern</h2>
+        <form>
+            <fieldset>
+              <legend>Ausgabe anlegen</legend>
+              <div>
+                <label for="amount">Ausgabe in €: </label>
+                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="1" required [(ngModel)]="expenditure.amount">
+              </div>
+              <div>
+                <label for="description">Beschreibung: </label>
+                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Parkticket" tabindex="2" required [(ngModel)]="expenditure.description">
+              </div>
+              <div>
+                <label for="article">Artikel:</label>
+                <input list="text" id="article" name="article" tabindex="3" [(ngModel)]="expenditure.article" readonly>
+              </div>
+              <div>
+                <label for="receiptCopy">Fotokopie hochladen: </label>
+                <input type="file" id="receiptCopy" name="receiptCopy" accept="image/*" (change)="onFileSelected($event)">
+              </div>
+              <div>
+                <label for="account">Auf Konto buchen: </label>
+                <select id="account" required (change)="updateExpenditureCategories()">
+                  <option value="">0 - Bitte das zu belastende Konto wählen...</option>
+                  <option *ngFor="let account of accounts" [value]="account.id" [selected]="selectedAccountId === account.id">
+                      {{account.id}} - {{account.name}}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label for="expenditureCategory">Kategorie: </label>
+                <select id="expenditureCategory">
+                  <option value="">0 - Bitte zuerst das Konto wählen...</option>
+                  <option *ngFor="let expenditureCategory of expenditureCategories" [value]="expenditureCategory.id" [selected]="selectedExpenditureCategoryId === expenditureCategory.id">
+                      {{expenditureCategory.id}} - {{expenditureCategory.name}}
+                  </option>
+              </select>
+              </div>
+            </fieldset>
+            <div>
+                <input type="reset">
+                <input type="submit" id="submit" (click)="add()">
+            </div>
+          </form>
+    </article>
+    <article *ngFor="let receiptCopy of expenditure.receiptCopies">
+      <div>
+        <h2>Fotokopie > Nr.: {{receiptCopy.id}}</h2>
+        <div>
+          <img *ngIf="receiptImageUrls[receiptCopy.id]" [src]="receiptImageUrls[receiptCopy.id]" alt="Receipt Image" />
+        </div>
+        <div>
+          <button type="button" class="button-right" title="Fotokopie löschen" (click)="deleteReceiptCopy(receiptCopy)">Fotokopie löschen</button>
+          <button type="button" class="button-left" title="Automatisiert übersetzen" (click)="translateReceiptCopy(receiptCopy)">Automatisiert übersetzen</button>
+        </div>
+        <label for="textfield-{{receiptCopy.id}}" class="textfieldlabel">OCR-Ergebnis:</label>
+        <div>
+          <textarea id="textfield-{{receiptCopy.id}}" class="textfield" readonly>{{receiptCopy.translation}}</textarea>
+        </div>
+      </div>
+    </article>
+</main>

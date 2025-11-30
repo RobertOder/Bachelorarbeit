@@ -1,0 +1,56 @@
+<!--<h1>{{householdMember.name | uppercase}} Details</h1>
+<div><span>id: </span>{{householdMember.id}}</div>-->
+<main>
+    <article>
+        <h2>{{householdMember.firstname}} {{householdMember.name}} > Konto anlegen / ändern</h2>
+      <form>
+        <fieldset>
+          <legend>Konto anlegen</legend>
+          <div>
+            <label for="name">Kontoname: </label>
+            <input type="text" id="name" name="name" pattern="[a-zA-ZÄÖÜäöüß\s]+" size="30" maxlength="30" placeholder="Sparkonto" tabindex="1" required [(ngModel)]="account.name">
+          </div>
+          <div>
+            <label for="balance">Aktueller Kontostand in €: </label>
+            <input type="text" id="balance" name="balance" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="2" required [(ngModel)]="account.balance">
+          </div>
+          <div>
+            <label for="household">Gehört zu welchem Haushalt: </label>
+            <select #householdSelectId >
+              <option *ngFor="let household of households" [value]="household.id">
+                  {{household.id}} - {{household.name}}
+              </option>
+          </select>
+          </div>
+        </fieldset>
+        <div>
+            <input type="reset">
+            <input type="submit" (click)="add(account, householdSelectId.value)">
+        </div>
+      </form>
+    </article>
+    <article>
+      <h2>Meine aktiven Konten</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nr</th>
+                    <th>Name</th>
+                    <th>Kontostand</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let myAccount of householdMember.accounts">
+                  <td>{{myAccount.id}}</td>
+                  <td>{{myAccount.name}}</td>
+                  <td class="text-center">{{myAccount.balance}}€</td>
+                  <td>
+                      <button type="button" class="update" title="Konto bearbeiten" (click)="editAccount(myAccount)">Konto bearbeiten</button>
+                      <button type="button" class="update" title="Konto löschen" (click)="deleteAccount(myAccount)">Konto löschen</button>
+                  </td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+  </main>

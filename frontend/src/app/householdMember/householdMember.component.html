@@ -1,0 +1,59 @@
+<!--<h1>{{householdMember.name | uppercase}} Details</h1>
+<div><span>id: </span>{{householdMember.id}}</div>-->
+<main>
+  <article>
+    <h2>Haushaltsmitglied anlegen / ändern</h2>
+    <form>
+      <fieldset>
+        <legend>Persönliche Daten</legend>
+        <div>
+          <label for="firstname">Vorname: </label>
+          <input type="text" id="firstname" name="firstname" pattern="[a-zA-ZÄÖÜäöüß\s]+" size="30" maxlength="30" placeholder="Max" tabindex="1" required [(ngModel)]="householdMember.firstname">
+        </div>
+        <div>
+          <label for="name">Nachname: </label>
+          <input type="text" id="name" name="name" pattern="[a-zA-ZÄÖÜäöüß\s]+" size="30" maxlength="30" placeholder="Mustermann" tabindex="2" required [(ngModel)]="householdMember.name">
+        </div>
+        <div>
+          <label for="address">Straße und Hausnummer: </label>
+          <input type="text" id="address" name="address" size="30" maxlength="30" placeholder="Straße 123a" tabindex="3" required [(ngModel)]="householdMember.address">
+        </div>
+        <div>
+          <label for="zip">PLZ: </label>
+          <input type="text" id="zip" name="zip" pattern="[0-9]{5}" placeholder="12345" tabindex="4" required [(ngModel)]="householdMember.zip">
+        </div>
+        <div>
+          <label for="city">Ort: </label>
+          <input type="text" id="city" name="city" pattern="[a-zA-ZÄÖÜäöüß\s]+" placeholder="Berlin" tabindex="5" required [(ngModel)]="householdMember.city">
+        </div>
+        <div>
+          <label for="state">Bundesland: </label>
+          <input type="text" id="state" name="state" pattern="[a-zA-ZÄÖÜäöüß\s]+" placeholder="Berlin" tabindex="5" required [(ngModel)]="householdMember.state">
+        </div>
+        <div>
+          <label for="country">Land: </label>
+          <input type="text" id="country" name="country" pattern="[a-zA-ZÄÖÜäöüß\s]+" placeholder="Deutschland" tabindex="6" required [(ngModel)]="householdMember.country">
+        </div>
+        <div>
+          <label for="phone">Telefon: </label>
+          <input type="text" id="phone" name="phone" pattern="[0-9]{8,}" placeholder="030123456" tabindex="7" required [(ngModel)]="householdMember.phone">
+        </div>
+        <div>
+          <label for="email">E-Mail: </label>
+          <input id="email" name="email" type="email" size="30" maxlength="30" placeholder="deine@mail.de" tabindex="8" required [(ngModel)]="householdMember.email">
+        </div>
+        <div>
+          <label for="password">Passwort: </label>
+          <input type="password" id="password" name="password" size="30" maxlength="30" tabindex="9" required [(ngModel)]="householdMember.password" placeholder="Passwort123">
+        </div>
+      </fieldset>
+      <div>
+          <input type="reset">
+          <input type="submit" (click)="add(householdMember)">
+      </div>
+      <div>
+        <button *ngIf="householdMember.id" type="button" class="button-right" title="Benutzer löschen" (click)="delete(householdMember)">Benutzer löschen</button>
+      </div>
+    </form>
+  </article>
+</main>

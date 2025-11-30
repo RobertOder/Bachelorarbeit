@@ -1,0 +1,32 @@
+meta {
+  name: Create_HouseholdMember_5
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://localhost:8080/api/householdMember/upsert
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Toast",
+      "firstname": "Torben",
+      "email": "torben@toast.de",
+      "phone": "030123654",
+      "address": "Am Arsch 1",
+      "city": "Königs Wusterhausen",
+      "state": "Brandenburg",
+      "zip": "15745",
+      "country": "Deutschland",
+      "password": "AhhAhh25!",
+      "created": "2025-01-20"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

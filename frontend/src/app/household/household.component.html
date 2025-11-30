@@ -1,0 +1,57 @@
+<main>
+    <article>
+      <h2>{{householdMember.firstname}} {{householdMember.name}} > Haushalt anlegen / beitreten</h2>
+      <form>
+        <fieldset>
+          <legend>Haushalt anlegen</legend>
+          <div>
+            <label for="name">Name des Haushalts: </label>
+            <input type="text" id="name" name="name" pattern="[a-zA-ZÄÖÜäöüß\s]+" size="30" maxlength="30" placeholder="Max Haushalt" tabindex="1" required [(ngModel)]="household.name">
+          </div>
+        </fieldset>
+        <div>
+            <input type="reset">
+            <button class="button-right" (click)="addNewHousehold(household)">Erstellen</button>
+        </div>
+      </form>
+      <form>
+        <fieldset>
+          <legend>Haushalt beitreten</legend>
+          <div>
+            <label for="name">Name des Haushalts: </label>
+            <select #householdSelectId >
+              <option *ngFor="let household of households" [value]="household.id">
+                  {{household.id}} - {{household.name}}
+              </option>
+          </select>
+          </div>
+        </fieldset>
+        <div>
+            <button class="button-right" (click)="add(householdSelectId.value)">Beitreten</button>
+        </div>
+      </form>
+    </article>
+    <article>
+      <h2>Meine aktiven Haushalte</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nr</th>
+                    <th>Name</th>
+                    <th>Erstellt</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let myHousehold of householdMember.households">
+                  <td>{{myHousehold.id}}</td>
+                  <td>{{myHousehold.name}}</td>
+                  <td>{{myHousehold.created| date:'dd-MM-yyyy'}}</td>
+                  <td>
+                      <button type="button" title="Haushalt löschen" (click)="deleteHousehold(myHousehold)">löschen</button>
+                  </td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+  </main>

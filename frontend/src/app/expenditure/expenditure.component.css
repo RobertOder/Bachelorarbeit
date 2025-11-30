@@ -1,0 +1,39 @@
+img {
+    width: 30vw;
+    height: auto;
+    object-fit: contain;
+}
+
+.button-right{
+    float: left;
+    width: 50%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.button-left{
+    clear: both;
+    width: 50%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2%;
+}
+
+.textfield{
+    clear: both;
+    width: 100%;
+    max-width: 100%;
+    height: 10rem;
+    max-height: 10rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.textfieldlabel{
+    clear: both;
+    text-align: left;
+    padding: auto;
+    margin: auto;
+}

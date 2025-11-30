@@ -1,2 +1,4 @@
 # Bachelorarbeit
 A web-based software for budget and expense management.
+
+After specifying the PostgreSQL database connection under “/src/main/resources/application.properties”, the application can be run directly; no data needs to be imported into the database as JPA / Hibernate creates the required references directly. For testing, it is recommended to execute the API-collection under “/doc/api-collections/” (created with Bruno / alternative Postman-Client). The spring-backend can be found under "/src" and the angular-frontend under "/frontend". For further information, please refer to the documentation under “/doc/”.

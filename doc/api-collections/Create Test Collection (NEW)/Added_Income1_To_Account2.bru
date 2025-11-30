@@ -1,0 +1,27 @@
+meta {
+  name: Added_Income1_To_Account2
+  type: http
+  seq: 13
+}
+
+patch {
+  url: http://localhost:8080/api/account/2/addIncome
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "date": "2024-12-21",
+      "amount": 4500.0,
+      "currency": "EUR",
+      "recurring": false,
+      "recurringInterval": null,
+      "description": "Gehalt 01/25"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
