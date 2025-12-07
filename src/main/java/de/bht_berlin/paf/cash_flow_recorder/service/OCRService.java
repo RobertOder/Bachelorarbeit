@@ -156,6 +156,7 @@ public class OCRService {
 
         // Exctract the structur
         Canny(morph, edges, 50, 150);
+        imwrite(imagePath + "_canny.jpg", edges);
 
         // Find contoures from the image
         findContours(
@@ -249,8 +250,16 @@ public class OCRService {
         tesseract.setVariable("user_defined_dpi", userDefinedDpi);
         //tesseract.setVariable("tessedit_char_whitelist", charWhiteList);
         try {
-            logger.info("OCR completed for file: " + imagePath + "_filtered.jpg");
-            String ocrResult = tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
+            File imageTransformed = new File(imagePath + "_filtered.jpg");
+            File imageOriginal = new File(imagePath);
+            String ocrResult = null;
+            if (imageTransformed.exists()) {
+                logger.info("OCR completed for file: " + imagePath + "_filtered.jpg");
+                ocrResult = tesseract.doOCR(imageTransformed);
+            } else {
+                logger.info("OCR completed for file: " + imagePath);
+                ocrResult = tesseract.doOCR(imageOriginal);
+            }
             //String ocrResult =  tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //dictionary = loadDictionary(System.getProperty("user.dir") + "/lib/de_DE.dic");
             dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
