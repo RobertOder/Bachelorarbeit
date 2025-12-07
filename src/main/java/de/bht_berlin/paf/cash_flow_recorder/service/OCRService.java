@@ -1,6 +1,10 @@
 package de.bht_berlin.paf.cash_flow_recorder.service;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import net.sourceforge.tess4j.Tesseract;
@@ -55,11 +59,181 @@ public class OCRService {
     private JLanguageTool langTool = new JLanguageTool(new German());
 
     /**
-     * Experimental preprocessing to improove the ocr result
+     * This method sorts a 2 D point array of type Point2f in order of top-left, top-right, bottom-right, bottom-left
+     * @param points - Points of type Pont2f (OpenCV)
+     * @return rect - Ordered points of type Point2f (OpenCV - Point as two dimensions (x,y) as 32bit Float)
+     */
+    private static Point2f[] orderPoints(Point2f[] points) {
+        Point2f[] rect = new Point2f[4]; // Define return var
+
+        // Sum and Difference Values for calculate the corners
+        double[] sum = new double[4];
+        double[] diff = new double[4];
+        for (int i = 0; i < 4; i++) {
+            sum[i] = points[i].x() + points[i].y();
+            diff[i] = points[i].x() - points[i].y();
+        }
+        // assign the calulated values to the return var
+        rect[0] = points[argMin(sum)];  // top-left
+        rect[2] = points[argMax(sum)];  // bottom-right
+        // changed / different from doc/python_v4 - otherwise mirrored, actualy I dont know why :( ?!
+        rect[3] = points[argMin(diff)]; // top-right - (origin index 1)
+        rect[1] = points[argMax(diff)]; // bottom-left - (origin index 3)
+
+        return rect;
+    }
+
+    /**
+     * Method for finding the minimum value in a double-array
+     * @param array - Array of type double[]
+     * @return index - Index points to minimal value
+     */
+    private static int argMin(double[] array) {
+        int index = 0;
+        for(int i = 1; i < array.length; i++) {
+            if(array[i] < array[index]){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Method for finding the maximum value in a double-array
+     * @param array - Array of type double[]
+     * @return index- Index points to maximal value
+     */
+    private static int argMax(double[] array) {
+        int index = 0;
+        for(int i = 1; i < array.length; i++) {
+            if(array[i] > array[index]){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Experimental preprocessing to detect document and improove the ocr result
      * @param imagePath - local path to image
      */
-    public void preprocess(String imagePath){
-        // in progress
+    public void preprocess(String imagePath) {
+        Mat original = imread(imagePath);
+        double imgArea = original.rows() * original.cols();
+        Mat grayscale =  new Mat();
+        Mat blurred = new Mat();
+        Mat binary = new Mat();
+        Mat morph = new Mat();
+        Mat edges = new Mat();
+        Mat kernel = getStructuringElement(MORPH_RECT, new Size(2, 2));
+        MatVector contours = new MatVector();
+        Mat hierarchy = new Mat();
+        Mat warped = new Mat();
+
+        cvtColor(original, grayscale, COLOR_BGR2GRAY); // Convert color image to gray values
+        imwrite(imagePath + "_BGR2GRAY.jpg", grayscale); // write image to check the result
+        GaussianBlur(grayscale, blurred, new Size(19, 19), 19); // GaussianBlur better to detect documents, but can destroy thin lines
+        //medianBlur(grayscale, blurred, 3); // MedianBlur better for Text, because edges are preserved?
+        imwrite(imagePath + "_GaussianBlur.jpg", blurred);
+        // threshold(blurred, binary, 0, 255, THRESH_BINARY | THRESH_OTSU); // bad by dark, shady pictures
+        adaptiveThreshold(
+                blurred,
+                binary,
+                255,
+                ADAPTIVE_THRESH_MEAN_C, // or ADAPTIVE_THRESH_GAUSSIAN_C?
+                THRESH_BINARY,
+                31,  // blocksize (try 11–31)
+                5   // subtract constant
+        );
+        imwrite(imagePath + "_adaptiveThreshold.jpg", binary); // write image to check the result
+        //morphologyEx(binary, morph, MORPH_CLOSE, kernel); // better to detect text
+        morphologyEx(binary, morph, MORPH_OPEN, kernel); // better to detect documents
+        imwrite(imagePath + "_MORPH_OPEN.jpg", morph); // write image to check the result
+
+        // Erosion again if the edges are to thick
+        //binary = morph.clone();
+        //erode(binary, binary, kernel);
+
+        // Exctract the structur
+        Canny(morph, edges, 50, 150);
+
+        // Find contoures from the image
+        findContours(
+                edges,
+                contours,
+                hierarchy,
+                RETR_EXTERNAL,
+                CHAIN_APPROX_SIMPLE
+        );
+
+        // go through contours to find one with 4 corners
+        for (long i = 0; i < contours.size(); i++) {
+            Mat contour = contours.get(i);
+            contour.convertTo(contour, opencv_core.CV_32FC2); // convert from integer to 32Bit float with 2 channels
+            double peri = arcLength(contour, true); // calculate perimeter (true = figure closed)
+
+            // Contour approximated to fewer points (max 10% deviate from the original perimeter)
+            Mat approx = new Mat();
+            approxPolyDP(contour, approx, 0.1 * peri, true);
+
+            // approximated Contuorspoints  == 4 for Documents
+            if (approx.rows() == 4) {
+                double area = opencv_imgproc.contourArea(approx); // calculated area from contour
+                // detect only large contours (8%-98% from origin-image)
+                if (area > 0.08 * imgArea && area < 0.98 * imgArea) {
+                    // Convert from Mat tot Point2f
+                    Point2f[] pts = new Point2f[4];
+                    approx.convertTo(approx, opencv_core.CV_32FC2);
+                    FloatIndexer indexer = approx.createIndexer(); // Need Float Indexer to get x / y values from approx
+                    for (int j = 0; j < 4; j++) {
+                        float x = indexer.get(j, 0, 0);
+                        float y = indexer.get(j, 0, 1);
+                        pts[j] = new Point2f(x, y); // Convert to type of Point2f
+                    }
+                    indexer.release(); // release the indexer ressource
+
+                    // Order Points to equalize the image-perspective
+                    Point2f[] ordered = orderPoints(pts);
+                    Point2f tl = ordered[0];
+                    Point2f tr = ordered[1];
+                    Point2f br = ordered[2];
+                    Point2f bl = ordered[3];
+
+                    // Calculate target witdh and hight via hypertenuse
+                    int width = (int) Math.max(
+                            Math.hypot(br.x() - bl.x(), br.y() - bl.y()),
+                            Math.hypot(tr.x() - tl.x(), tr.y() - tl.y())
+                    );
+                    int height = (int) Math.max(
+                            Math.hypot(tr.x() - br.x(), tr.y() - br.y()),
+                            Math.hypot(tl.x() - bl.x(), tl.y() - bl.y())
+                    );
+
+                    // Define source and destination Mat() for transformation matrix
+                    Mat sourcePoints = new Mat(4, 1, opencv_core.CV_32FC2);
+                    FloatIndexer sourceIndex = sourcePoints.createIndexer();
+                    sourceIndex.put(0, 0, tl.x(), tl.y()); // top-left
+                    sourceIndex.put(1, 0, tr.x(), tr.y()); // top-right
+                    sourceIndex.put(2, 0, br.x(), br.y()); // buttom-right
+                    sourceIndex.put(3, 0, bl.x(), bl.y()); // buttom-left
+                    sourceIndex.release(); // release indexer
+
+                    Mat destinationPoints = new Mat(4, 1, opencv_core.CV_32FC2);
+                    FloatIndexer destinationIndex = destinationPoints.createIndexer();
+                    destinationIndex.put(0, 0, 0f, 0f); // top-left
+                    destinationIndex.put(1, 0, width - 1f, 0f); // top-right
+                    destinationIndex.put(2, 0, width - 1f, height - 1f); // bottom-right
+                    destinationIndex.put(3, 0, 0f, height - 1f); // bottom-left
+                    destinationIndex.release(); // release indexer
+
+                    // Transformation and saving the result
+                    Mat M = getPerspectiveTransform(sourcePoints, destinationPoints);
+                    warpPerspective(original, warped, M, new Size(width, height));
+                    imwrite(imagePath + "_filtered.jpg", warped);
+                }
+            }
+        }
+
     }
 
     /**
@@ -75,8 +249,8 @@ public class OCRService {
         tesseract.setVariable("user_defined_dpi", userDefinedDpi);
         //tesseract.setVariable("tessedit_char_whitelist", charWhiteList);
         try {
-            logger.info("OCR completed for file: " + imagePath);
-            String ocrResult = tesseract.doOCR(new File(imagePath));
+            logger.info("OCR completed for file: " + imagePath + "_filtered.jpg");
+            String ocrResult = tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //String ocrResult =  tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //dictionary = loadDictionary(System.getProperty("user.dir") + "/lib/de_DE.dic");
             dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);

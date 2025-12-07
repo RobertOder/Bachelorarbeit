@@ -1,0 +1,17 @@
+#videoRef {
+  display: none;
+}
+
+#canvas {
+  display: none;
+}
+
+#canvasOut {
+  border: 1px solid #ccc;
+  width: 100%;"
+}
+
+#canvasWarp {
+  border:1px solid red;
+  width:100%;
+}
