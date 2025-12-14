@@ -48,16 +48,23 @@
     <article *ngFor="let receiptCopy of expenditure.receiptCopies">
       <div>
         <h2>Fotokopie > Nr.: {{receiptCopy.id}}</h2>
-        <div>
+        <span>
           <img *ngIf="receiptImageUrls[receiptCopy.id]" [src]="receiptImageUrls[receiptCopy.id]" alt="Receipt Image" />
-        </div>
+        </span>
         <div>
           <button type="button" class="button-right" title="Fotokopie löschen" (click)="deleteReceiptCopy(receiptCopy)">Fotokopie löschen</button>
-          <button type="button" class="button-left" title="Automatisiert übersetzen" (click)="translateReceiptCopy(receiptCopy)">Automatisiert übersetzen</button>
+          <button type="button" class="button-left" title="OCR ausführen" (click)="translateReceiptCopy(receiptCopy)">OCR ausführen</button>
         </div>
-        <label for="textfield-{{receiptCopy.id}}" class="textfieldlabel">OCR-Ergebnis:</label>
+        <label for="ocr-textfield-{{receiptCopy.id}}" class="textfieldlabel">OCR-Ergebnis:</label>
         <div>
-          <textarea id="textfield-{{receiptCopy.id}}" class="textfield" readonly>{{receiptCopy.translation}}</textarea>
+          <textarea id="ocr-textfield-{{receiptCopy.id}}" class="textfield" readonly>{{receiptCopy.translation}}</textarea>
+        </div>
+        <div>
+          <button type="button" class="button-left" title="KI Kategorien generieren" (click)="categorizeReceiptCopy(receiptCopy)">KI Kategorien generieren</button>
+        </div>
+        <label for="categorie-textfield-{{receiptCopy.id}}" class="textfieldlabel">KI Kategorie-Vorschlag:</label>
+        <div>
+          <textarea id="categorie-textfield-{{receiptCopy.id}}" class="textfield" readonly></textarea>
         </div>
       </div>
     </article>

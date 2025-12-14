@@ -47,6 +47,14 @@ export class ReceiptCopyService {
       );
     }
 
+    categorizeReceiptCopy(id: number): Observable<string> {
+      const url = `${this.receiptCopyUrl}/${id}/findCategories`;
+      return this.http.get(url, { responseType: 'text' }).pipe(
+        tap(response => this.log(`Server Response: ${response}`)),
+        catchError(this.handleError<string>(`categorizeReceiptCopy id=${id}`))
+      );
+    }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -120,6 +122,35 @@ public class ReceiptCopyController {
             ReceiptCopy savedReceiptCopy = receiptCopyService.processReceipt(receiptCopy.getFirst());
             logger.info("HTTP-Response: ReceiptCopy with id " + id + " was translated");
             return ResponseEntity.ok(savedReceiptCopy.getTranslation());
+        }
+    }
+
+    // Provisorisch/Testweise... mach ich noch richtig...
+    @GetMapping("/{id}/findCategories")
+    @CrossOrigin
+    public ResponseEntity<String> findCategories(@PathVariable Long id) {
+        List<ReceiptCopy> receiptCopy = receiptCopyService.findReceiptCopy(id);
+        //return ResponseEntity.ok("maaan...ey....");
+        if (receiptCopy.isEmpty()) {
+            logger.warn("HTTP-Response: ReceiptCopy with id " + id + " could not be found");
+            return ResponseEntity.notFound().build();
+        } else {
+            // Service fuer API zur LLM aufrufen
+            String posibleCategories = receiptCopyService.processFindCategory(receiptCopy.getFirst());
+            logger.info("KI-Answers: " + posibleCategories);
+            //posibleCategories.replaceAll("<think>.*?</think>", "");
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                JsonNode rootNode = objectMapper.readTree(posibleCategories);
+                JsonNode responseNode = rootNode.path("response");
+                //posibleCategories = responseNode.path("categories").asText();
+                posibleCategories = responseNode.asText();
+            } catch(Exception ex) {
+                logger.error("Failed to parse String to JSON: " + ex.getMessage());
+            }
+            logger.info("HTTP-Response: Found Categories for ReceiptCopy with id " + id + " ");
+            logger.info("Return KI-Answer: " + posibleCategories);
+            return ResponseEntity.ok(posibleCategories);
         }
     }
 }

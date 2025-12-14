@@ -138,12 +138,22 @@ export class ExpenditureComponent {
 
   translateReceiptCopy(receiptCopy: ReceiptCopy): void {
     this.receiptCopyService.translateReceiptCopy(receiptCopy.id).subscribe( tmp => {
-      const textfield = document.getElementById('textfield-' + receiptCopy.id) as HTMLTextAreaElement;
+      const textfield = document.getElementById('ocr-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
       if (textfield) {
         textfield.value = tmp;
       }
       this.router.navigate(['home-component']);
   });
+  }
+
+  categorizeReceiptCopy(receiptCopy: ReceiptCopy): void {
+    this.receiptCopyService.categorizeReceiptCopy(receiptCopy.id).subscribe( tmp => {
+      const textfield = document.getElementById('categorie-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
+      if (textfield) {
+        textfield.value = tmp;
+      }
+      //this.router.navigate(['home-component']);
+    });
   }
 
 }
