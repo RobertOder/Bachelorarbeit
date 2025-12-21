@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "Create Test Collection (NEW)",
+  "name": "Create_test-environment",
   "type": "collection",
   "ignore": [
     "node_modules",

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Backend_OCR+AI-tests",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

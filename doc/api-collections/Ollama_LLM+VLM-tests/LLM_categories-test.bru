@@ -1,0 +1,29 @@
+meta {
+  name: LLM_categories-test
+  type: http
+  seq: 37
+}
+
+post {
+  url: http://localhost:11434/api/generate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "model": "deepseek-r1:8b",
+    "prompt": "Antworte nur in dem folgenden JSON-Format: ( 'categories': <Haushaltskategorien auf Deutsch> ) Frage: Analysiere die Produkte eines Kassenbons, welche mit OCR erfasst wurden. Ich möchte in Bezug auf diese Produkte eine flache Liste mit Vorschlägen zu möglichen übergeordneten Haupt-Ausgabe-Kategorien eines Haushalts. Diese Haushaltskategorien sollen einfach hintereinenader aufgelistet werden, ohne Fließtext. Anbei die Produkte: [BUTTER, SCHOKOLADE, NUDELN, TOILETTENPAPIER]",
+    "format": "json",
+    "keep_alive": "0s",
+    "options": {
+      "temperatur": 0
+    },
+    "stream": false
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
