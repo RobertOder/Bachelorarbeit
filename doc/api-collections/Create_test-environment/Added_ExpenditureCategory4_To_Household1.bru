@@ -1,0 +1,23 @@
+meta {
+  name: Added_ExpenditureCategory4_To_Household1
+  type: http
+  seq: 28
+}
+
+patch {
+  url: http://localhost:8080/api/household/1/addExpenditureCategory
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "KfZ",
+      "upperLimit": 300.0
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

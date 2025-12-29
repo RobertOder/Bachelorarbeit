@@ -1,0 +1,32 @@
+meta {
+  name: Create_HouseholdMember_1
+  type: http
+  seq: 2
+}
+
+patch {
+  url: http://localhost:8080/api/householdMember/upsert
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Oder",
+      "firstname": "Robert",
+      "email": "robert@oder.de",
+      "phone": "030123456",
+      "address": "Am Graben 12",
+      "city": "Berlin",
+      "state": "Berlin",
+      "zip": "10365",
+      "country": "Deutschland",
+      "password": "BlaBla",
+      "created": "2024-12-21T00:00:00.000+00:00"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

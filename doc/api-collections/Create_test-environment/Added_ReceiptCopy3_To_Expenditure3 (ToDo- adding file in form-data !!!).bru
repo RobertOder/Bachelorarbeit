@@ -1,0 +1,20 @@
+meta {
+  name: Added_ReceiptCopy3_To_Expenditure3 (ToDo: adding file in form-data !!!)
+  type: http
+  seq: 24
+}
+
+patch {
+  url: http://localhost:8080/api/expenditure/3/addReceiptCopy
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  photoFile: @file(/C:/Users/Robby/Desktop/Quelle.png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

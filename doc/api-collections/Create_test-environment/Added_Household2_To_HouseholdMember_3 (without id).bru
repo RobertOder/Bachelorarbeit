@@ -1,0 +1,23 @@
+meta {
+  name: Added_Household2_To_HouseholdMember_3 (without id)
+  type: http
+  seq: 9
+}
+
+patch {
+  url: http://localhost:8080/api/householdMember/3/addHousehold
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Max",
+      "created": "2024-12-23"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

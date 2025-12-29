@@ -1,0 +1,26 @@
+meta {
+  name: Assign_Expenditure2_To_ExpenditureCategory4
+  type: http
+  seq: 35
+}
+
+patch {
+  url: http://localhost:8080/api/expenditure/2/assignCategory?expenditureCategory=4
+  body: json
+  auth: inherit
+}
+
+params:query {
+  expenditureCategory: 4
+}
+
+body:json {
+  {
+      
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

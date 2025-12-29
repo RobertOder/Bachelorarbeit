@@ -1,0 +1,43 @@
+REWE
+REWE Markt
+Kerstin Daedelow oHG
+Kiefholzstraße 50
+12435 Berlin
+UID Nr.: DE247504796
+
+SERRANO SCHINKEN          EUR 3,29 B
+POM. LEB. W. SCHNI.       EUR 2,69 B
+BAGUETTESALAMI           EUR 1,99 B
+TEEWURST FEIN             EUR 1,39 B
+RUEGENW TEEWURST          EUR 1,99 B
+ZIEGENKAES E 50%          EUR 2,59 B
+BIO KOER FRISCHK          EUR 1,49 B
+DOPPELBRÖT. HELL          EUR 1,56 B
+4 Stk x 0,39              EUR 1,77 B
+KAROTTENKRUEST.           EUR 1,79 B
+3 Stk x 0,59
+RAMA M. BUTTER
+
+SUMME                     EUR 20,55
+Geg. VISA
+Steuer %                  Netto       Steuer       Brutto
+B= 7,0%                   19,21       1,34        20,55
+Gesamtbetrag              19,21       1,34        20,55
+
+TSE-Signatur:
+ZSZ0n9YyQiNGre0U6o0Nx8qws6PQAB0eu
+madbxuNU7SevF1725B0GNOvPaY++rYvgo
+cGQnFkboru08x1ivRLa1hCLA0RZh48hnJ
+S3j9uczu7uxqbs8Kx0D8uxFjZeffp
+
+TSE-Signaturzähler: 339318
+TSE-Transaktion: 161231
+TSE-Start: 2025-11-18T11:55:01.000
+TSE-Stop: 2025-11-18T11:55:04.000
+Seriennummer Kasse: REWE:18:c0:4d:1e:05:06:00
+18.11.2025 11:55
+Markt:5369 Kasse:2 Bon-Nr.:8702
+Bed.:171717
+
+Noch kein REWE Bonus-Kunde?
+Jetzt in der REWE App anmelden.

@@ -1,0 +1,27 @@
+meta {
+  name: Added_Expenditure4_To_Account2
+  type: http
+  seq: 21
+}
+
+patch {
+  url: http://localhost:8080/api/account/2/addExpenditure
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "date": "2025-01-23",
+      "amount": 55.0,
+      "currency": "EUR",
+      "recurring": false,
+      "recurringInterval": null,
+      "description": "Aldi-Einkauf"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
