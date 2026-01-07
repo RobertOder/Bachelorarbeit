@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Create_test-expenditures_with_receipts-translate_all",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

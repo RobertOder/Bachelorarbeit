@@ -1,0 +1,20 @@
+meta {
+  name: Added_ReceiptCopy_To_Expenditure (ToDo: adding file in form-data !!!) (38)
+  type: http
+  seq: 136
+}
+
+patch {
+  url: http://localhost:8080/api/expenditure/43/addReceiptCopy
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  photoFile: @file(U:\Bachelor-Arbeit\sync\13 Test-Kassenzettel\IMG_20260107_124006.jpg)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

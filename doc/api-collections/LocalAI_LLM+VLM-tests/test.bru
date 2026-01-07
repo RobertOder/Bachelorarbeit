@@ -1,0 +1,36 @@
+meta {
+  name: test
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8585/v1/chat/completions
+  body: json
+  auth: inherit
+}
+
+headers {
+  ~content-type: '''
+    application/json
+    application/json
+  '''
+}
+
+body:json {
+  { 
+    "model": "qwen3-vl-4b-thinking", 
+    "messages": [
+      {
+        "role": "user", 
+        "content": "Hallo Wie gehts dir?", 
+        "temperature": 0.1
+      }
+    ] 
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
