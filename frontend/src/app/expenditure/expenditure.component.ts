@@ -147,13 +147,21 @@ export class ExpenditureComponent {
   }
 
   categorizeReceiptCopy(receiptCopy: ReceiptCopy): void {
-    this.receiptCopyService.categorizeReceiptCopy(receiptCopy.id).subscribe( tmp => {
-      const textfield = document.getElementById('categorie-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
-      if (textfield) {
-        textfield.value = tmp;
-      }
-      //this.router.navigate(['home-component']);
-    });
+    var accountId = document.getElementById("account") as HTMLSelectElement;
+    var searchedAccountId = Number(accountId.value);
+    if (this.selectedAccountId) {
+      searchedAccountId = this.selectedAccountId;
+    }
+    this.accountService.getHousehold(searchedAccountId)
+      .subscribe(household => {
+        this.receiptCopyService.categorizeReceiptCopy(receiptCopy.id, household.id).subscribe( tmp => {
+          const textfield = document.getElementById('categorie-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
+          if (textfield) {
+            textfield.value = tmp;
+          }
+          //this.router.navigate(['home-component']);
+        });
+      });
   }
 
 }

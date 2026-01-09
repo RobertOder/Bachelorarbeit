@@ -131,10 +131,10 @@ public class OCRService {
         Mat warped = new Mat();
 
         cvtColor(original, grayscale, COLOR_BGR2GRAY); // Convert color image to gray values
-        imwrite(imagePath + "_BGR2GRAY.jpg", grayscale); // write image to check the result
+        //imwrite(imagePath + "_BGR2GRAY.jpg", grayscale); // write image to check the result
         GaussianBlur(grayscale, blurred, new Size(19, 19), 19); // GaussianBlur better to detect documents, but can destroy thin lines
         //medianBlur(grayscale, blurred, 3); // MedianBlur better for Text, because edges are preserved?
-        imwrite(imagePath + "_GaussianBlur.jpg", blurred);
+        //imwrite(imagePath + "_GaussianBlur.jpg", blurred);
         // threshold(blurred, binary, 0, 255, THRESH_BINARY | THRESH_OTSU); // bad by dark, shady pictures
         adaptiveThreshold(
                 blurred,
@@ -145,10 +145,10 @@ public class OCRService {
                 31,  // blocksize (try 11–31)
                 5   // subtract constant
         );
-        imwrite(imagePath + "_adaptiveThreshold.jpg", binary); // write image to check the result
+        //imwrite(imagePath + "_adaptiveThreshold.jpg", binary); // write image to check the result
         //morphologyEx(binary, morph, MORPH_CLOSE, kernel); // better to detect text
         morphologyEx(binary, morph, MORPH_OPEN, kernel); // better to detect documents
-        imwrite(imagePath + "_MORPH_OPEN.jpg", morph); // write image to check the result
+        //imwrite(imagePath + "_MORPH_OPEN.jpg", morph); // write image to check the result
 
         // Erosion again if the edges are to thick
         //binary = morph.clone();
@@ -156,7 +156,7 @@ public class OCRService {
 
         // Exctract the structur
         Canny(morph, edges, 50, 150);
-        imwrite(imagePath + "_canny.jpg", edges);
+        //imwrite(imagePath + "_canny.jpg", edges);
 
         // Find contoures from the image
         findContours(
@@ -257,6 +257,7 @@ public class OCRService {
                 logger.info("OCR completed for file: " + imagePath + "_filtered.jpg");
                 ocrResult = tesseract.doOCR(imageTransformed);
             } else {
+                // Hier via VLM (erst, wenn mehr von den anderen Kassenbons erkannt wurde / dauert sonst zu lange) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 logger.info("OCR completed for file: " + imagePath);
                 ocrResult = tesseract.doOCR(imageOriginal);
             }
@@ -287,21 +288,36 @@ public class OCRService {
      */
     public List<List<String>> extractDetails(String ocrResult){
         // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
-        Pattern itemPattern = Pattern.compile("(.+?)\\s+(\\d+,\\d{2})\\s*€?");
-        Pattern amountPattern = Pattern.compile("(Summe|Gesamt|Total|Kartenzahlung|Gesamtbetrag|VISA|EUR|%)\\s+(\\d+,\\d{2})");
+        Pattern itemPattern = Pattern.compile("(.+?)\\s+\\b(\\d+[,.]\\d{2})\\s.*");
+        Pattern amountPattern = Pattern.compile("\\b(summe|" +
+                "gesamt|" +
+                "total|" +
+                "kartenzahlung|" +
+                "karte|" +
+                "bruttoumsatz|" +
+                "girocard|" +
+                "gesamtbetrag|" +
+                "auftragswert|" +
+                "visa|" +
+                "betrag|" +
+                "brutto|" +
+                "ec-cash|" +
+                "ec cash|" +
+                "zahlen)\\b.*\\b(\\d+[,.]\\d{2}).*");
         List<List<String>> detailsList = new ArrayList<List<String>>();
 
         String[] lines = ocrResult.split("\\r?\\n");
 
         List<String> itemsList = new ArrayList<>();
         double calculatedSum = 0.0;
-        double totalPrice = -1.0; // -1 = noch nicht gefunden
+        double totalPrice = -11.0; // -1 = noch nicht gefunden
 
         for (String line : lines) {
-            // komische Woerter filtern
-            String cleanedLine = fixOCRWord(line);
+            // komische Woerter filtern --> erstmal ohne, weil bestimmte Trennzeichen doch wichtig sind
+            //String cleanedLine = fixOCRWord(line);
+            String cleanedLine = line.replaceAll("\u00A0", " ");
             // Zuerst nach Gesamtbetrag suchen
-            Matcher totalMatcher = amountPattern.matcher(cleanedLine);
+            Matcher totalMatcher = amountPattern.matcher(cleanedLine.toLowerCase());
             if (totalMatcher.find()) {
                 totalPrice = Double.parseDouble(totalMatcher.group(2).replace(",", "."));
                 continue;
@@ -315,10 +331,10 @@ public class OCRService {
 
                 // Abgleich mit Worterbuch
                 //String correctedItem = correctOCRText(item);
-                String correctedItem = item; // Funktioneirt noch am Besten
+                String correctedItem = item; // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
 
                 // Ausschluss bestimmter Worter als Artikel
-                if (correctedItem.toLowerCase().matches(".*(summe|zahlung|rückgeld|steuer|gesamt|total|kartenzahlung|gesamtbetrag|visa|eur|%).*")) {
+                if (correctedItem.toLowerCase().matches(".*(summe|zahlung|rückgeld|steuer|gesamt|total|kartenzahlung|gesamtbetrag|visa|eur|betrag|brutto|netto|%).*")) {
                     continue;
                 }
 
@@ -328,7 +344,8 @@ public class OCRService {
         }
 
         // Falls kein expliziter Gesamtbetrag gefunden wurde --> Artikel-Summe nehmen
-        double finalTotal = (totalPrice > 0) ? totalPrice : calculatedSum;
+        //double finalTotal = (totalPrice > 0) ? totalPrice : calculatedSum;
+        double finalTotal = totalPrice;
 
         // Uebergabe in die Attribute
         String[] Items = itemsList.toArray(new String[0]);
@@ -343,7 +360,7 @@ public class OCRService {
         // Artikel als ein String in die Entity ReceiptCopy uebernehmen, damit diese in der Datenbank gespeichert werden koennen
         System.out.println("Gefundene Artikel via List.toString:"+ItemsString);
         // Gesamtsumme in die Entität Expenditure uebernehmen
-        System.out.println("Gesamtsumme in €: " + price);
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Gesamtsumme in €: " + price);
 
         List<String> finalAmount = new ArrayList<>();
         finalAmount.add(String.valueOf(finalTotal));

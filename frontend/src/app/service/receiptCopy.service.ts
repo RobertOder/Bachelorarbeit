@@ -15,7 +15,7 @@ import { ReceiptCopy } from '../model/receiptCopy';
 @Injectable({ providedIn: 'root' })
 export class ReceiptCopyService {
 
-  private receiptCopyUrl = 'http://localhost:8080/api/receiptCopy';  // URL to web api
+  private receiptCopyUrl = 'http://192.168.178.27:8080/api/receiptCopy';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -47,8 +47,8 @@ export class ReceiptCopyService {
       );
     }
 
-    categorizeReceiptCopy(id: number): Observable<string> {
-      const url = `${this.receiptCopyUrl}/${id}/findCategories`;
+    categorizeReceiptCopy(id: number, householdId: number): Observable<string> {
+      const url = `${this.receiptCopyUrl}/${id}/findCategories?household=${householdId}`;
       return this.http.get(url, { responseType: 'text' }).pipe(
         tap(response => this.log(`Server Response: ${response}`)),
         catchError(this.handleError<string>(`categorizeReceiptCopy id=${id}`))

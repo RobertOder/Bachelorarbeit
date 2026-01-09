@@ -17,7 +17,7 @@ import { BrowserModule } from '@angular/platform-browser';
 @Injectable({ providedIn: 'root' })
 export class HouseholdMemberService {
 
-  private householdMemberUrl = 'http://localhost:8080/api/householdMember';  // URL to web api
+  private householdMemberUrl = 'http://192.168.178.27:8080/api/householdMember';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

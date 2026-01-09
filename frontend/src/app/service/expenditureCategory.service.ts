@@ -7,7 +7,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class ExpenditureCategoryService {
 
-  private expenditureCategoryUrl = 'http://localhost:8080/api/expenditureCategory';  // URL to web api
+  private expenditureCategoryUrl = 'http://192.168.178.27:8080/api/expenditureCategory';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

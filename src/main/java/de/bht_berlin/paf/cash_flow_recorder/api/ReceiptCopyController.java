@@ -1,6 +1,8 @@
 package de.bht_berlin.paf.cash_flow_recorder.api;
 
+import de.bht_berlin.paf.cash_flow_recorder.entity.Household;
 import de.bht_berlin.paf.cash_flow_recorder.entity.ReceiptCopy;
+import de.bht_berlin.paf.cash_flow_recorder.service.HouseholdService;
 import de.bht_berlin.paf.cash_flow_recorder.service.ReceiptCopyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,8 @@ public class ReceiptCopyController {
     private ReceiptCopyService receiptCopyService;
 
     private final Logger logger = LoggerFactory.getLogger(ReceiptCopyController.class);
+    @Autowired
+    private HouseholdService householdService;
 
     // CRUD-Operations for the entity
     // CREATE / UPDATE over the Expenditure
@@ -128,15 +132,18 @@ public class ReceiptCopyController {
     // Provisorisch/Testweise... mach ich noch richtig...
     @GetMapping("/{id}/findCategories")
     @CrossOrigin
-    public ResponseEntity<String> findCategories(@PathVariable Long id) {
+    public ResponseEntity<String> findCategories(
+            @PathVariable Long id,
+            @RequestParam(value = "household", required = false) final Long householdId) {
         List<ReceiptCopy> receiptCopy = receiptCopyService.findReceiptCopy(id);
+        List<Household> household = householdService.findHousehold(householdId);
         //return ResponseEntity.ok("maaan...ey....");
         if (receiptCopy.isEmpty()) {
             logger.warn("HTTP-Response: ReceiptCopy with id " + id + " could not be found");
             return ResponseEntity.notFound().build();
         } else {
             // Service fuer API zur LLM aufrufen
-            String posibleCategories = receiptCopyService.processFindCategory(receiptCopy.getFirst());
+            String posibleCategories = receiptCopyService.processFindCategory(receiptCopy.getFirst(), household.getFirst());
             logger.info("KI-Answers: " + posibleCategories);
             //posibleCategories.replaceAll("<think>.*?</think>", "");
             ObjectMapper objectMapper = new ObjectMapper();
