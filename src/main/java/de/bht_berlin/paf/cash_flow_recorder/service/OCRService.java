@@ -269,7 +269,7 @@ public class OCRService {
                 logger.info("OCR completed for file: " + imagePath);
                 ocrResult = tesseract.doOCR(imageOriginal);
             }
-            ocrResult = tesseract.doOCR(imageOriginal);
+            //ocrResult = tesseract.doOCR(imageOriginal);
             //String ocrResult =  tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //dictionary = loadDictionary(System.getProperty("user.dir") + "/lib/de_DE.dic");
             //dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
