@@ -1,10 +1,19 @@
 package de.bht_berlin.paf.cash_flow_recorder.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.bht_berlin.paf.cash_flow_recorder.entity.Expenditure;
+import de.bht_berlin.paf.cash_flow_recorder.entity.ExpenditureCategory;
+import de.bht_berlin.paf.cash_flow_recorder.entity.ReceiptCopyStatus;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import net.sourceforge.tess4j.Tesseract;
@@ -18,15 +27,14 @@ import org.languagetool.rules.RuleMatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.text.Normalizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -261,10 +269,12 @@ public class OCRService {
                 logger.info("OCR completed for file: " + imagePath);
                 ocrResult = tesseract.doOCR(imageOriginal);
             }
+            ocrResult = tesseract.doOCR(imageOriginal);
             //String ocrResult =  tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //dictionary = loadDictionary(System.getProperty("user.dir") + "/lib/de_DE.dic");
-            dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
-            List<List<String>> ocrDetails = extractDetails(ocrResult);
+            //dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
+            List<List<String>> ocrDetails = extractDetailsWithRegExPattern(ocrResult);
+            //List<List<String>> ocrDetails = extractDetailsWithLLM(ocrResult);
             List<String> ocrText = new ArrayList<>();
             ocrText.add(ocrResult);
             result.add(ocrText);
@@ -282,13 +292,13 @@ public class OCRService {
     }
 
     /**
-     * Extract article and amount from the receipt copy
+     * Extract article and amount from the receipt copy via RegExPattern
      * @param ocrResult
      * @return detailsList
      */
-    public List<List<String>> extractDetails(String ocrResult){
+    public List<List<String>> extractDetailsWithRegExPattern(String ocrResult){
         // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
-        Pattern itemPattern = Pattern.compile("(.+?)\\s+\\b(\\d+[,.]\\d{2})\\s.*");
+        //Pattern itemPattern = Pattern.compile("(.+?)\\s+\\b(\\d+[,.]\\d{2})\\s.*");
         Pattern amountPattern = Pattern.compile("\\b(summe|" +
                 "gesamt|" +
                 "total|" +
@@ -310,7 +320,7 @@ public class OCRService {
 
         List<String> itemsList = new ArrayList<>();
         double calculatedSum = 0.0;
-        double totalPrice = -11.0; // -1 = noch nicht gefunden
+        double totalPrice = -1.0; // -1 = noch nicht gefunden
 
         for (String line : lines) {
             // komische Woerter filtern --> erstmal ohne, weil bestimmte Trennzeichen doch wichtig sind
@@ -323,29 +333,35 @@ public class OCRService {
                 continue;
             }
             // Dann Artikel pruefen
-            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
-            if (itemMatcher.find()) {
-                String item = itemMatcher.group(1).trim();
-                String priceStr = itemMatcher.group(2).replace(",", "."); // Komma → Punkt
-                double price = Double.parseDouble(priceStr);
-
-                // Abgleich mit Worterbuch
-                //String correctedItem = correctOCRText(item);
-                String correctedItem = item; // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
-
-                // Ausschluss bestimmter Worter als Artikel
-                if (correctedItem.toLowerCase().matches(".*(summe|zahlung|rückgeld|steuer|gesamt|total|kartenzahlung|gesamtbetrag|visa|eur|betrag|brutto|netto|%).*")) {
-                    continue;
-                }
-
-                itemsList.add(correctedItem);
-                calculatedSum += price;
-            }
+//            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
+//            if (itemMatcher.find()) {
+//                String item = itemMatcher.group(1).trim();
+//                String priceStr = itemMatcher.group(2).replace(",", "."); // Komma → Punkt
+//                double price = Double.parseDouble(priceStr);
+//
+//                // Abgleich mit Worterbuch
+//                //String correctedItem = correctOCRText(item);
+//                String correctedItem = item; // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
+//
+//                // Ausschluss bestimmter Worter als Artikel
+//                if (correctedItem.toLowerCase().matches(".*(summe|zahlung|rückgeld|steuer|gesamt|total|kartenzahlung|gesamtbetrag|visa|eur|betrag|brutto|netto|%).*")) {
+//                    continue;
+//                }
+//
+//                itemsList.add(correctedItem);
+//                calculatedSum += price;
+//            }
         }
 
-        // Falls kein expliziter Gesamtbetrag gefunden wurde --> Artikel-Summe nehmen
-        //double finalTotal = (totalPrice > 0) ? totalPrice : calculatedSum;
-        double finalTotal = totalPrice;
+        itemsList = extractArticlesWithLLM(ocrResult);
+
+        // Falls kein expliziter Gesamtbetrag gefunden wurde:
+        //double finalTotal = (totalPrice > 0) ? totalPrice : calculatedSum; --> Artikel-Summe nehmen
+        //double finalTotal = totalPrice; --> Notfalls einfach den Startwert "-1" nehmen
+        double  finalTotal = totalPrice; // Pattern hat gegriffen
+        if (totalPrice == -1.0) {
+            finalTotal = extractPriceWithLLM(ocrResult); // Pattern hat nicht gegriffen, dann ueber LLM
+        }
 
         // Uebergabe in die Attribute
         String[] Items = itemsList.toArray(new String[0]);
@@ -369,29 +385,188 @@ public class OCRService {
         return detailsList;
     }
 
-    private String fixOCRWord(String word) {
-        String[] parts = word.split("\\s+");
-        if (parts.length <= 1) return word;
-
-        // Alle Nachbarteile durchprobieren
-        for (int i = 0; i < parts.length - 1; i++) {
-            String joined = parts[i] + parts[i + 1];
-            if (dictionary.contains(joined)) {
-                // Ersetzt die zwei Teile durch das zusammengefuegte Wort
-                StringBuilder sb = new StringBuilder();
-                for (int j = 0; j < parts.length; j++) {
-                    if (j == i) {
-                        sb.append(joined).append(" ");
-                        j++; // den naechsten Teil überspringen
-                    } else {
-                        sb.append(parts[j]).append(" ");
-                    }
+    /**
+     * Extract amount from the receipt copy via LLM
+     * @param ocrResult
+     * @return finalTotal
+     */
+    public List<String> extractArticlesWithLLM(String ocrResult){
+        List<String> articles = new ArrayList<>();
+        String url = "http://localhost:11434/api/generate";
+        if (!ocrResult.isEmpty()) {
+            // Vorverarbeitung des ocrResults
+            Normalizer.normalize(ocrResult, Normalizer.Form.NFKC);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            Map<String, Object> body = new HashMap<>();
+            body.put("model", "qwen3:8b");
+            body.put("prompt", "Antworte nur in dem folgenden JSON-Format: (" +
+                    " 'article': <articel1, article2> ) Frage: Analysiere den" +
+                    " Kassenbons, welcher mit OCR erfasst wurde. Ich möchte die" +
+                    " die Artikelnamen 1:1 ohne Preise als flache Liste. Ein Artikel" +
+                    " ist immer ein Produkt gefolgt vom Preis. Wenn du dir nicht sicher" +
+                    " bist, ob es sich bei diesem Artikel um ein Produkt handelt, lasse" +
+                    " ihn weg. Hier das OCR-Ergebnis: [" + ocrResult + "]");
+            body.put("format", "json");
+            body.put("keep_alive", "0s");
+            Map<String, Object> options = new HashMap<>();
+            options.put("temperature", 0);
+            body.put("options", options);
+            body.put("stream", false);
+            logger.info("AI-Request-Body sent: " + body);
+            HttpEntity<?> entity = new HttpEntity<>(body, headers);
+            String posibleArticles;
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+                posibleArticles = response.getBody();
+                logger.info("AI-Request-Body receive: " + posibleArticles);
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    JsonNode rootNode = objectMapper.readTree(posibleArticles);
+                    JsonNode responseNode = rootNode.path("response");
+                    JsonNode innerNode = objectMapper.readTree(responseNode.asText());
+                    JsonNode articleNode = innerNode.path("article");
+                    articleNode.forEach(node -> articles.add(node.asText()));
+                } catch(Exception ex) {
+                    logger.error("Failed to parse String to JSON: " + ex.getMessage());
                 }
-                return sb.toString().trim();
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
             }
         }
-        return word;
+        return articles;
     }
+
+    /**
+     * Extract article from the receipt copy via LLM
+     * @param ocrResult
+     * @return articleList
+     */
+    public double extractPriceWithLLM(String ocrResult){
+        String posibleSum;
+        String finalTotal = "-1.0";
+        String url = "http://localhost:11434/api/generate";
+        if (!ocrResult.isEmpty()) {
+            // Vorverarbeitung des ocrResults
+            Normalizer.normalize(ocrResult, Normalizer.Form.NFKC);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            Map<String, Object> body = new HashMap<>();
+            body.put("model", "deepseek-r1:8b");
+            body.put("prompt", "Antworte nur in dem folgenden JSON-Format: (" +
+                    " 'sum': <Betrag als Double> ) Frage: Analysiere den" +
+                    " Kassenbons, welcher mit OCR erfasst wurde:" + ocrResult +
+                    " Ich möchte das du mir den Gesamtbetrag aus dem OCR-Text raussuchst.");
+            body.put("format", "json");
+            body.put("keep_alive", "0s");
+            Map<String, Object> options = new HashMap<>();
+            options.put("temperature", 0);
+            body.put("options", options);
+            body.put("stream", false);
+            logger.info("AI-Request-Body sent: " + body);
+            HttpEntity<?> entity = new HttpEntity<>(body, headers);
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+                posibleSum = response.getBody();
+                logger.info("AI-Request-Body receive: " + posibleSum);
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    JsonNode rootNode = objectMapper.readTree(posibleSum);
+                    JsonNode responseNode = rootNode.path("response");
+                    JsonNode innerNode = objectMapper.readTree(responseNode.asText());
+                    JsonNode sumNode = innerNode.path("sum");
+                    finalTotal = sumNode.asText();
+                } catch(Exception ex) {
+                    logger.error("Failed to parse String to JSON: " + ex.getMessage());
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+            }
+        }
+        return Double.parseDouble(finalTotal.replace(",", "."));
+    }
+
+    /**
+     * Extract article and amount from the receipt copy via LLM
+     * @param ocrResult
+     * @return detailsList
+     */
+//    public List<List<String>> extractDetailsWithLLM(String ocrResult){ // Alternative zu extractDetailsWithRegExPattern
+//        List<List<String>> detailsList = new ArrayList<List<String>>();
+//        List<String> itemsList = new ArrayList<>();
+//        String posibleSum;
+//        String finalTotal = "-1.0";
+//        String url = "http://localhost:11434/api/generate";
+//        if (!ocrResult.isEmpty()) {
+//            // Vorverarbeitung des ocrResults
+//            Normalizer.normalize(ocrResult, Normalizer.Form.NFKC);
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.set("Content-Type", "application/json");
+//            Map<String, Object> body = new HashMap<>();
+//            body.put("model", "deepseek-r1:8b");
+//            body.put("prompt", "Antworte nur in dem folgenden JSON-Format: (" +
+//                    " 'sum': <Betrag als Double> ) Frage: Analysiere den" +
+//                    " Kassenbons, welcher mit OCR erfasst wurde:" + ocrResult +
+//                    " Ich möchte das du mir den Gesamtbetrag aus dem OCR-Text raussuchst.");
+//            body.put("format", "json");
+//            body.put("keep_alive", "0s");
+//            Map<String, Object> options = new HashMap<>();
+//            options.put("temperature", 0);
+//            body.put("options", options);
+//            body.put("stream", false);
+//            logger.info("AI-Request-Body sent: " + body);
+//            HttpEntity<?> entity = new HttpEntity<>(body, headers);
+//            try {
+//                RestTemplate restTemplate = new RestTemplate();
+//                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+//                posibleSum = response.getBody();
+//                logger.info("AI-Request-Body receive: " + posibleSum);
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                try {
+//                    JsonNode rootNode = objectMapper.readTree(posibleSum);
+//                    JsonNode responseNode = rootNode.path("response");
+//                    JsonNode innerNode = objectMapper.readTree(responseNode.asText());
+//                    JsonNode sumNode = innerNode.path("sum");
+//                    finalTotal = sumNode.asText();
+//                } catch(Exception ex) {
+//                    logger.error("Failed to parse String to JSON: " + ex.getMessage());
+//                }
+//            } catch (Exception ex) {
+//                logger.error(ex.getMessage());
+//            }
+//        }
+//        List<String> finalAmount = new ArrayList<>();
+//        finalAmount.add(finalTotal);
+//        detailsList.add(finalAmount);
+//        detailsList.add(itemsList);
+//        return detailsList;
+//    }
+
+//    private String fixOCRWord(String word) {
+//        String[] parts = word.split("\\s+");
+//        if (parts.length <= 1) return word;
+//
+//        // Alle Nachbarteile durchprobieren
+//        for (int i = 0; i < parts.length - 1; i++) {
+//            String joined = parts[i] + parts[i + 1];
+//            if (dictionary.contains(joined)) {
+//                // Ersetzt die zwei Teile durch das zusammengefuegte Wort
+//                StringBuilder sb = new StringBuilder();
+//                for (int j = 0; j < parts.length; j++) {
+//                    if (j == i) {
+//                        sb.append(joined).append(" ");
+//                        j++; // den naechsten Teil überspringen
+//                    } else {
+//                        sb.append(parts[j]).append(" ");
+//                    }
+//                }
+//                return sb.toString().trim();
+//            }
+//        }
+//        return word;
+//    }
 
     //private String correctOCR(String word) {
     //    String bestMatch = word;
@@ -443,83 +618,83 @@ public class OCRService {
     //    return word;
     //}
 
-    public String correctOCRText(String text) {
-        String[] words = text.split("\\s+");
-        StringBuilder corrected = new StringBuilder();
+//    public String correctOCRText(String text) {
+//        String[] words = text.split("\\s+");
+//        StringBuilder corrected = new StringBuilder();
+//
+//        for (String word : words) {
+//            String fixed = correctOCR(word); // hier deine Levenshtein-Methode
+//            corrected.append(fixed).append(" ");
+//        }
+//
+//        return corrected.toString().trim();
+//    }
 
-        for (String word : words) {
-            String fixed = correctOCR(word); // hier deine Levenshtein-Methode
-            corrected.append(fixed).append(" ");
-        }
-
-        return corrected.toString().trim();
-    }
-
-    public String correctOCR(String word) {
-        try {
-            List<RuleMatch> matches = langTool.check(word);
-
-            if (matches.isEmpty()) {
-                return word;
-            }
-
-            String bestSuggestion = word;
-            int bestDistance = Integer.MAX_VALUE;
-
-            for (RuleMatch match : matches) {
-                for (String suggestion : match.getSuggestedReplacements()) {
-                    int distance = levenshteinDistance(word, suggestion);
-                    if (distance < bestDistance) {
-                        bestDistance = distance;
-                        bestSuggestion = suggestion;
-                    }
-                }
-            }
-
-            return bestSuggestion;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return word;
-    }
+//    public String correctOCR(String word) {
+//        try {
+//            List<RuleMatch> matches = langTool.check(word);
+//
+//            if (matches.isEmpty()) {
+//                return word;
+//            }
+//
+//            String bestSuggestion = word;
+//            int bestDistance = Integer.MAX_VALUE;
+//
+//            for (RuleMatch match : matches) {
+//                for (String suggestion : match.getSuggestedReplacements()) {
+//                    int distance = levenshteinDistance(word, suggestion);
+//                    if (distance < bestDistance) {
+//                        bestDistance = distance;
+//                        bestSuggestion = suggestion;
+//                    }
+//                }
+//            }
+//
+//            return bestSuggestion;
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return word;
+//    }
 
     // Standard-Levenshtein-Distanzberechnung / gibt aber auch Bibliotheken... zu spaet gemerkt.... -.-
-    private int levenshteinDistance(String a, String b) {
-        int[][] dp = new int[a.length() + 1][b.length() + 1];
+//    private int levenshteinDistance(String a, String b) {
+//        int[][] dp = new int[a.length() + 1][b.length() + 1];
+//
+//        for (int i = 0; i <= a.length(); i++) dp[i][0] = i;
+//        for (int j = 0; j <= b.length(); j++) dp[0][j] = j;
+//
+//        for (int i = 1; i <= a.length(); i++) {
+//            for (int j = 1; j <= b.length(); j++) {
+//                int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
+//                dp[i][j] = Math.min(Math.min(
+//                                dp[i - 1][j] + 1,      // Einfügen
+//                                dp[i][j - 1] + 1),     // Löschen
+//                        dp[i - 1][j - 1] + cost // Ersetzen
+//                );
+//            }
+//        }
+//        return dp[a.length()][b.length()];
+//    }
 
-        for (int i = 0; i <= a.length(); i++) dp[i][0] = i;
-        for (int j = 0; j <= b.length(); j++) dp[0][j] = j;
-
-        for (int i = 1; i <= a.length(); i++) {
-            for (int j = 1; j <= b.length(); j++) {
-                int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
-                dp[i][j] = Math.min(Math.min(
-                                dp[i - 1][j] + 1,      // Einfügen
-                                dp[i][j - 1] + 1),     // Löschen
-                        dp[i - 1][j - 1] + cost // Ersetzen
-                );
-            }
-        }
-        return dp[a.length()][b.length()];
-    }
-
-    private Set<String> loadDictionary(String path) {
-        Set<String> dict = new HashSet<>();
-        List<String> lines = null;
-        try {
-            lines = Files.readAllLines(Paths.get(path));
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-            System.out.println(e.getMessage());
-        }
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.isEmpty() && !line.startsWith("#")) {
-                dict.add(line);
-            }
-        }
-        return dict;
-    }
+//    private Set<String> loadDictionary(String path) {
+//        Set<String> dict = new HashSet<>();
+//        List<String> lines = null;
+//        try {
+//            lines = Files.readAllLines(Paths.get(path));
+//        } catch (IOException e) {
+//            logger.error(e.getMessage());
+//            System.out.println(e.getMessage());
+//        }
+//        for (String line : lines) {
+//            line = line.trim();
+//            if (!line.isEmpty() && !line.startsWith("#")) {
+//                dict.add(line);
+//            }
+//        }
+//        return dict;
+//    }
 }

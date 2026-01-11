@@ -13,12 +13,12 @@
                 <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Parkticket" tabindex="2" required [(ngModel)]="expenditure.description">
               </div>
               <div>
-                <label for="article">Artikel:</label>
-                <input list="text" id="article" name="article" tabindex="3" [(ngModel)]="expenditure.article" readonly>
+                <label for="receiptCopy">Fotokopie hochladen: </label>
+                <input [disabled]="selectedFileView !== null" type="file" id="receiptCopy" name="receiptCopy" accept="image/*" (change)="onFileSelected($event)">
               </div>
               <div>
-                <label for="receiptCopy">Fotokopie hochladen: </label>
-                <input type="file" id="receiptCopy" name="receiptCopy" accept="image/*" (change)="onFileSelected($event)">
+                <label for="documentRecognizer">Fotokopie erstellen: </label>
+                <button [disabled]="selectedFileView !== null" type="button" title="documentRecognizer" (click)="documentRecognizer(householdMember, expenditure)">Dokument erfassen</button>
               </div>
               <div>
                 <label for="account">Auf Konto buchen: </label>
@@ -38,12 +38,31 @@
                   </option>
               </select>
               </div>
+              <div>
+                <label for="article">Artikel:</label>
+                <ul>
+                  <li *ngFor="let article of expenditure.article">
+                    {{ article }}
+                  </li>
+                </ul>
+              </div>
             </fieldset>
             <div>
                 <input type="reset">
                 <input type="submit" id="submit" (click)="add()">
             </div>
           </form>
+    </article>
+    <article *ngIf="selectedFileView">
+      <div>
+        <h2>Fotokopie</h2>
+        <span>
+            <img [src]="selectedFileView" alt="Receipt Image" />
+        </span>
+      </div>
+      <div>
+        <button type="button" title="documentRecognizer" (click)="removeDocument()">Fotokopie löschen</button>
+      </div>
     </article>
     <article *ngFor="let receiptCopy of expenditure.receiptCopies">
       <div>

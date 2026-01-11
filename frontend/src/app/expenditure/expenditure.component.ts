@@ -12,6 +12,7 @@ import { Expenditure } from '../model/expenditure';
 import { ReceiptCopy } from '../model/receiptCopy';
 import { ExpenditureCategory } from '../model/expenditureCategory';
 import { Router } from '@angular/router';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-expenditure',
@@ -29,6 +30,7 @@ export class ExpenditureComponent {
   accounts: Account[] = [];
   expenditureCategories: ExpenditureCategory[] = [];
   selectedFile: File | null = null;
+  selectedFileView: string | null = null;
   selectedAccountId: number | null = null;
   selectedExpenditureCategoryId: number | null = null;
   receiptImageUrls: { [id: number]: string } = {}; // Speichert die Bild-URLs mit ID als Schlüssel
@@ -46,6 +48,7 @@ export class ExpenditureComponent {
         if (expenditure) {
           this.expenditure = expenditure;
         }
+        this.selectedFileView = this.expenditureService.getRecognizedDocument();
       } else {
         console.log("Konnte history.state nicht verarbeiten")
       }
@@ -54,19 +57,31 @@ export class ExpenditureComponent {
     }
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    // Hier pruefen, ob File bereits gesetzt wurde....
     this.getAccounts();
     if (this.expenditure?.receiptCopies) {
       this.expenditure.receiptCopies.forEach(receiptCopy => {
         this.getImage(receiptCopy.id);
       });
     }
+    if (this.selectedFileView) {
+      const dataURL: string = this.selectedFileView;
+      this.selectedFile = await this.dataURLtoFile(dataURL, "recognizedDocument.png");
+    }
+  }
+
+  async dataURLtoFile(dataUrl: string, filename: string): Promise<File> {
+    const res =  await fetch(dataUrl);
+    const blob =  await res.blob();
+    return new File([blob], filename,{ type: 'image/png' })
   }
 
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
     if (file) {
       this.selectedFile = file;
+      this.selectedFileView = URL.createObjectURL(file);
     }
   }
 
@@ -96,6 +111,7 @@ export class ExpenditureComponent {
     toSavedExpenditure.amount = this.expenditure.amount;
     this.expenditure.currency = 'EUR';
     this.expenditure.recurring = false;
+    this.expenditureService.removeRecognizedDocument();
     this.accountService.addExpenditure(Number(accountId.value), toSavedExpenditure, this.selectedFile).subscribe(expenditure => {
       this.expenditureService.assignCategory(expenditure.id , Number(expenditureCategoryId.value)).subscribe( tmp => {
         this.router.navigate(['home-component']);
@@ -162,6 +178,19 @@ export class ExpenditureComponent {
           //this.router.navigate(['home-component']);
         });
       });
+  }
+
+  documentRecognizer(householdMember: HouseholdMember, expenditure: Expenditure): void {
+    this.router.navigate( ['documentRecognizer'], { state: {
+        householdMember,
+        expenditure
+      }
+    });
+  }
+
+  removeDocument(): void {
+    this.selectedFileView = null;
+    this.expenditureService.removeRecognizedDocument();
   }
 
 }

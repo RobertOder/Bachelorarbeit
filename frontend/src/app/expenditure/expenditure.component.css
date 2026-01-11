@@ -37,3 +37,12 @@ img {
     padding: auto;
     margin: auto;
 }
+
+ul {
+  float: right;
+  margin-top: 0;
+}
+
+button {
+  margin-bottom: 2%;
+}

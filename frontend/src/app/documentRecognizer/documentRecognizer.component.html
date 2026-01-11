@@ -1,10 +1,11 @@
 <main>
   <article>
     <h2>{{title}}</h2>
+    <img id="saveFrame" *ngIf="snapshotUrl" [src]="snapshotUrl" (pointerdown)="addReceiptCopy(householdMember, expenditure)">
     <video id="videoRef" #video autoplay playsinline></video>
     <canvas id="canvas" #canvas></canvas>
     <div>
-      <canvas id="canvasOut" #outputCanvas></canvas>
+      <canvas id="canvasOut" #outputCanvas (pointerdown)="saveFrame()"></canvas>
     </div>
     <div>
       <canvas id="canvasWarp" #warpedCanvas></canvas>

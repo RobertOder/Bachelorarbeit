@@ -17,7 +17,9 @@ import { ExpenditureCategory } from '../model/expenditureCategory';
 @Injectable({ providedIn: 'root' })
 export class ExpenditureService {
 
+  // Hier noch File definieren? Fuer den documentRecognizer?
   private expenditureUrl = 'http://192.168.178.27:8080/api/expenditure';  // URL to web api
+  private recognizedDocument: string | null = null;
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -85,6 +87,18 @@ export class ExpenditureService {
         tap(_ => this.log('getExpenditureCategory: fetched expenditureCategory')),
         catchError(this.handleError<ExpenditureCategory>('getExpenditureCategory'))
       );
+  }
+
+  setRecognizedDocument(dataUrl: string | null) {
+    this.recognizedDocument = dataUrl;
+  }
+
+  getRecognizedDocument(): string | null {
+    return this.recognizedDocument;
+  }
+
+  removeRecognizedDocument() {
+    this.recognizedDocument = null;
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, NgZone} from '@angular/core';
+import {Component, AfterViewInit, ViewChild, ElementRef, NgZone, Input} from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Account } from '../model/account';
@@ -24,16 +24,21 @@ declare var cv: any; // Have to be defined, because the type wasn't allways foun
 })
 export class DocumentRecognizer implements AfterViewInit {
 
+  @Input() householdMember!: HouseholdMember;
+  @Input() expenditure!: Expenditure;
   title = "Dokument erkennen";
-
+  snapshotUrl: string | null = null;
   @ViewChild('video') video!: ElementRef<HTMLVideoElement>;
   // canvas needed by opencv for transitions
-  @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>; // Referenz für opencv.js
+  @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>; // Referenz for opencv.js
   @ViewChild('outputCanvas') outputCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('warpedCanvas') warpedCanvas!: ElementRef<HTMLCanvasElement>;
 
   // NgZone for asynchronous image analysis (performance reasons)
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone, private expenditureService: ExpenditureService, private router: Router) {
+    this.householdMember = history.state.householdMember;
+    this.expenditure = history.state.expenditure;
+  }
 
   orderPoints(points: any[]) {
 
@@ -243,5 +248,18 @@ export class DocumentRecognizer implements AfterViewInit {
     contours.delete();
     if (bestContour)
       bestContour.delete();
+  }
+
+  saveFrame() {
+    this.snapshotUrl = this.warpedCanvas.nativeElement.toDataURL('image/png');
+  }
+
+  addReceiptCopy(householdMember: HouseholdMember, expenditure: Expenditure) {
+    this.expenditureService.setRecognizedDocument(this.snapshotUrl);
+    this.router.navigate( ['expenditure-component'], { state: {
+        householdMember,
+        expenditure
+      }
+    });
   }
 }
