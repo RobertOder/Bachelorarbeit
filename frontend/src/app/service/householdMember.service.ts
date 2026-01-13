@@ -6,18 +6,13 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { HouseholdMember } from '../model/householdMember';
 import { Household } from '../model/household';
 import { Account } from '../model/account';
-import { BrowserModule } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
-// @NgModule({
-//     imports: [
-//     BrowserModule,
-//     HttpClientModule,
-//     ],
-// })
+
 @Injectable({ providedIn: 'root' })
 export class HouseholdMemberService {
 
-  private householdMemberUrl = 'http://localhost:8080/api/householdMember';  // URL to web api
+  private householdMemberUrl = environment.apiUrl+'/householdMember';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

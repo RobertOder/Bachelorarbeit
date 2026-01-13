@@ -3,19 +3,13 @@ import { Injectable, NgModule } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { ExpenditureCategory } from '../model/expenditureCategory';
-import { ReceiptCopy } from '../model/receiptCopy';
+import { environment } from '../../environments/environment';
 
-// @NgModule({
-//     imports: [
-//     BrowserModule,
-//     HttpClientModule,
-//     ],
-// })
+
 @Injectable({ providedIn: 'root' })
 export class ReceiptCopyService {
 
-  private receiptCopyUrl = 'http://localhost:8080/api/receiptCopy';  // URL to web api
+  private receiptCopyUrl = environment.apiUrl+'/receiptCopy';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

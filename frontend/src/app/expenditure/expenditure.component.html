@@ -24,9 +24,11 @@
                 <label for="account">Auf Konto buchen: </label>
                 <select id="account" required (change)="updateExpenditureCategories()">
                   <option value="">0 - Bitte das zu belastende Konto wählen...</option>
-                  <option *ngFor="let account of accounts" [value]="account.id" [selected]="selectedAccountId === account.id">
-                      {{account.id}} - {{account.name}}
-                  </option>
+                  <ng-container *ngFor="let account of accounts">
+                    <option *ngIf="account" [value]="account.id" [selected]="selectedAccountId === account.id">
+                        {{account.id}} - {{account.name}}
+                    </option>
+                  </ng-container>
                 </select>
               </div>
               <div>

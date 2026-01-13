@@ -5,18 +5,13 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Household } from '../model/household';
 import { ExpenditureCategory } from '../model/expenditureCategory';
-import { BrowserModule } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
-// @NgModule({
-//     imports: [
-//     BrowserModule,
-//     HttpClientModule,
-//     ],
-// })
+
 @Injectable({ providedIn: 'root' })
 export class HouseholdService {
 
-  private householdUrl = 'http://locahost:8080/api/household';  // URL to web api
+  private householdUrl = environment.apiUrl+'/household';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

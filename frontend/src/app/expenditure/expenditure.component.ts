@@ -89,7 +89,7 @@ export class ExpenditureComponent {
     this.householdMemberService.getAccounts(this.householdMember.id)
     .subscribe(accounts => {
       this.accounts = accounts;
-      if (this.expenditure.account.id != null) {
+      if (this.expenditure.account?.id != null) {
         this.selectedAccountId = this.expenditure.account.id;
         this.updateExpenditureCategories();
       }

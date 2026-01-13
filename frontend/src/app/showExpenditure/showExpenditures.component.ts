@@ -20,7 +20,7 @@ export class ShowExpendituresComponent {
   @Input() householdMember!: HouseholdMember;
   expenditures: Expenditure[] = [];
 
-  constructor(private expenditureService: ExpenditureService, private router: Router) { 
+  constructor(private expenditureService: ExpenditureService, private router: Router) {
     try{
       if (history.state && history.state.expenditure && history.state.householdMember) {
         console.log(`HALLOE`);
@@ -60,7 +60,7 @@ export class ShowExpendituresComponent {
   }
 
   updateExpenditure(expenditure: Expenditure): void {
-    this.router.navigate(['expenditure-component'], { 
+    this.router.navigate(['expenditure-component'], {
       state: {
         householdMember: this.householdMember,
         expenditure

@@ -4,21 +4,16 @@ import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Expenditure } from '../model/expenditure';
-import { BrowserModule } from '@angular/platform-browser';
 import { Account } from '../model/account';
 import { ExpenditureCategory } from '../model/expenditureCategory';
+import { environment } from '../../environments/environment';
 
-// @NgModule({
-//     imports: [
-//     BrowserModule,
-//     HttpClientModule,
-//     ],
-// })
+
 @Injectable({ providedIn: 'root' })
 export class ExpenditureService {
 
   // Hier noch File definieren? Fuer den documentRecognizer?
-  private expenditureUrl = 'http://localhost:8080/api/expenditure';  // URL to web api
+  private expenditureUrl = environment.apiUrl+'/expenditure';  // URL to web api
   private recognizedDocument: string | null = null;
 
   httpOptions = {

@@ -8,18 +8,13 @@ import { Income } from '../model/income';
 import { Household } from '../model/household';
 import { Expenditure } from '../model/expenditure';
 import { ExpenditureService } from './expenditure.service';
-import { BrowserModule } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
-// @NgModule({
-//     imports: [
-//     BrowserModule,
-//     HttpClientModule,
-//     ],
-// })
+
 @Injectable({ providedIn: 'root' })
 export class AccountService {
 
-  private accountUrl = 'http://localhost:8080/api/account';  // URL to web api
+  private accountUrl = environment.apiUrl+'/account';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

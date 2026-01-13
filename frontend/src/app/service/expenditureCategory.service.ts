@@ -3,11 +3,12 @@ import { Injectable, NgModule } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ExpenditureCategoryService {
 
-  private expenditureCategoryUrl = 'http://localhost:8080/api/expenditureCategory';  // URL to web api
+  private expenditureCategoryUrl = environment.apiUrl+'/expenditureCategory';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
