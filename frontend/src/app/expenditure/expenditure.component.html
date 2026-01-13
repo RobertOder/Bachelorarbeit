@@ -6,11 +6,11 @@
               <legend>Ausgabe anlegen</legend>
               <div>
                 <label for="amount">Ausgabe in €: </label>
-                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="1" required [(ngModel)]="expenditure.amount">
+                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="z.B. 12.50" tabindex="1" required [(ngModel)]="expenditure.amount">
               </div>
               <div>
                 <label for="description">Beschreibung: </label>
-                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Parkticket" tabindex="2" required [(ngModel)]="expenditure.description">
+                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="z.B. Parkticket" tabindex="2" required [(ngModel)]="expenditure.description">
               </div>
               <div>
                 <label for="receiptCopy">Fotokopie hochladen: </label>

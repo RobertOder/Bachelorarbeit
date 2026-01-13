@@ -15,7 +15,7 @@ import { ReceiptCopy } from '../model/receiptCopy';
 @Injectable({ providedIn: 'root' })
 export class ReceiptCopyService {
 
-  private receiptCopyUrl = 'http://192.168.178.27:8080/api/receiptCopy';  // URL to web api
+  private receiptCopyUrl = 'http://localhost:8080/api/receiptCopy';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

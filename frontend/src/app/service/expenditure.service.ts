@@ -18,7 +18,7 @@ import { ExpenditureCategory } from '../model/expenditureCategory';
 export class ExpenditureService {
 
   // Hier noch File definieren? Fuer den documentRecognizer?
-  private expenditureUrl = 'http://192.168.178.27:8080/api/expenditure';  // URL to web api
+  private expenditureUrl = 'http://localhost:8080/api/expenditure';  // URL to web api
   private recognizedDocument: string | null = null;
 
   httpOptions = {
