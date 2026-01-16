@@ -144,13 +144,13 @@ public class ReceiptCopyService {
                 String article = expenditureOfReceipt.getArticle().toString();
                 HttpHeaders headers = new HttpHeaders();
                 headers.set("Content-Type", "application/json");
-                String body = "{\"model\": \"deepseek-r1:8b\", \"prompt\": \"Antworte nur in dem folgenden JSON-Format: (" +
+                String body = "{\"model\": \"qwen3:8b\", \"prompt\": \"Antworte nur in dem folgenden JSON-Format: (" +
                         " 'categories': <Haushaltskategorien auf Deutsch> ) Frage: Analysiere die Produkte eines" +
                         " Kassenbons, welcher mit OCR erfasst wurde:" + article + " Ich möchte in Bezug auf diese" +
                         " Produkte zwei Vorschläge zu möglichen übergeordneten" +
                         " Haushaltskategorien. Bitte Schlage eine Kategorie aus der folgenden Liste vor:" +
-                        " " + expenditureCategories.toString() + " und eine Kategorie sollst du dir bitte" +
-                        " ausdenken.\", \"format\": \"json\", \"keep_alive\": \"0s\"," +
+                        " " + expenditureCategories.toString() + " und eine Kategorie sollst du bitte" +
+                        " komplett neu generieren.\", \"format\": \"json\", \"keep_alive\": \"0s\"," +
                         " \"options\": { \"temperature\": 0 }, \"stream\": false }";
                 logger.info("AI-Request-Body sent: " + body);
                 HttpEntity<String> entity = new HttpEntity<>(body, headers);

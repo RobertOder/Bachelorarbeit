@@ -137,7 +137,6 @@ public class ReceiptCopyController {
             @RequestParam(value = "household", required = false) final Long householdId) {
         List<ReceiptCopy> receiptCopy = receiptCopyService.findReceiptCopy(id);
         List<Household> household = householdService.findHousehold(householdId);
-        //return ResponseEntity.ok("maaan...ey....");
         if (receiptCopy.isEmpty()) {
             logger.warn("HTTP-Response: ReceiptCopy with id " + id + " could not be found");
             return ResponseEntity.notFound().build();
