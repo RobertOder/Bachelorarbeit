@@ -44,14 +44,17 @@ public class OCRService {
     @Value("${tesseract.datapath}")
     private String dataPath;
 
-    @Value("$tesseract.user-defined-dpi")
+    @Value("${tesseract.userDefineDpi}")
     private String userDefinedDpi;
 
-    @Value("$(tesseract.char-whitelist)")
-    private String charWhiteList;
+    //@Value("${tesseract.charWhiteList}")
+    //private String charWhiteList;
 
-    @Value("${dictionary.file}")
-    private String dictionaryFile;
+    //@Value("${dictionary.file}")
+    //private String dictionaryFile;
+
+    @Value("${pattern.sumMatchPattern.regexp}")
+    private String sumMatchPattern;
 
     private static final Logger logger = LoggerFactory.getLogger(OCRService.class);
     private final LevenshteinDistance levenshtein = new LevenshteinDistance();
@@ -291,21 +294,7 @@ public class OCRService {
     public List<List<String>> extractDetailsWithRegExPattern(String ocrResult){
         // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
         //Pattern itemPattern = Pattern.compile("(.+?)\\s+\\b(\\d+[,.]\\d{2})\\s.*");
-        Pattern amountPattern = Pattern.compile("\\b(summe|" +
-                "gesamt|" +
-                "total|" +
-                "kartenzahlung|" +
-                "karte|" +
-                "bruttoumsatz|" +
-                "girocard|" +
-                "gesamtbetrag|" +
-                "auftragswert|" +
-                "visa|" +
-                "betrag|" +
-                "brutto|" +
-                "ec-cash|" +
-                "ec cash|" +
-                "zahlen)\\b.*\\b(\\d+[,.]\\d{2}).*");
+        Pattern amountPattern = Pattern.compile(sumMatchPattern);
         List<List<String>> detailsList = new ArrayList<List<String>>();
 
         String[] lines = ocrResult.split("\\r?\\n");
