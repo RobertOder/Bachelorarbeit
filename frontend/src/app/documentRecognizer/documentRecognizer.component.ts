@@ -22,7 +22,7 @@ declare var cv: any; // Have to be defined, because the type wasn't allways foun
   templateUrl: './documentRecognizer.component.html',
   styleUrls: ['./documentRecognizer.component.css']
 })
-export class DocumentRecognizer implements AfterViewInit {
+export class DocumentRecognizerComponent implements AfterViewInit {
 
   @Input() householdMember!: HouseholdMember;
   @Input() expenditure!: Expenditure;

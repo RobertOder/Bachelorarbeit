@@ -8,7 +8,7 @@ import { ExpenditureCategoryComponent } from './expenditureCategory/expenditureC
 import { ShowExpendituresComponent } from './showExpenditure/showExpenditures.component';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
-import { DocumentRecognizer } from './documentRecognizer/documentRecognizer.component';
+import { DocumentRecognizerComponent } from './documentRecognizer/documentRecognizer.component';
 
 export const routes: Routes = [
     // see index.html for start web page
@@ -21,6 +21,6 @@ export const routes: Routes = [
     { path: 'expenditure-component', component: ExpenditureComponent},
     { path: 'expenditureCategory-component', component: ExpenditureCategoryComponent},
     { path: 'showExpenditures-component', component: ShowExpendituresComponent},
-    { path: 'documentRecognizer', component: DocumentRecognizer}
+    { path: 'documentRecognizer', component: DocumentRecognizerComponent}
 
 ];
