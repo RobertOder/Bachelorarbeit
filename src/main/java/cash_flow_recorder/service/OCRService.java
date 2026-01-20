@@ -292,8 +292,6 @@ public class OCRService {
      * @return detailsList
      */
     public List<List<String>> extractDetailsWithRegExPattern(String ocrResult){
-        // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
-        //Pattern itemPattern = Pattern.compile("(.+?)\\s+\\b(\\d+[,.]\\d{2})\\s.*");
         Pattern amountPattern = Pattern.compile(sumMatchPattern);
         List<List<String>> detailsList = new ArrayList<List<String>>();
 
@@ -313,27 +311,44 @@ public class OCRService {
                 totalPrice = Double.parseDouble(totalMatcher.group(2).replace(",", "."));
                 continue;
             }
+/*
             // Dann Artikel pruefen
-//            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
-//            if (itemMatcher.find()) {
-//                String item = itemMatcher.group(1).trim();
-//                String priceStr = itemMatcher.group(2).replace(",", "."); // Komma → Punkt
-//                double price = Double.parseDouble(priceStr);
-//
-//                // Abgleich mit Worterbuch
-//                //String correctedItem = correctOCRText(item);
-//                String correctedItem = item; // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
-//
-//                // Ausschluss bestimmter Worter als Artikel
-//                if (correctedItem.toLowerCase().matches(".*(summe|zahlung|rückgeld|steuer|gesamt|total|kartenzahlung|gesamtbetrag|visa|eur|betrag|brutto|netto|%).*")) {
-//                    continue;
-//                }
-//
-//                itemsList.add(correctedItem);
-//                calculatedSum += price;
-//            }
-        }
+            // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
+            Pattern itemPattern = Pattern.compile("(.+?).*\\b(\\d+[,.]\\d{2}).*");
+            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
+            if (itemMatcher.find()) {
+                String item = itemMatcher.group(1).trim();
+                String priceStr = itemMatcher.group(2).replace(",", ".");
+                double price = Double.parseDouble(priceStr);
+                // Abgleich mit Worterbuch
+                //String correctedItem = correctOCRText(item);
+                // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
+                String correctedItem = item;
 
+                // Ausschluss bestimmter Worter als Artikel
+                if (correctedItem.toLowerCase().matches(".*(summe|" +
+                        "zahlung|" +
+                        "rückgeld|" +
+                        "steuer|" +
+                        "gesamt|" +
+                        "total|" +
+                        "kartenzahlung|" +
+                        "gesamtbetrag|" +
+                        "visa|" +
+                        "eur|" +
+                        "betrag|" +
+                        "brutto|" +
+                        "netto|" +
+                        "%).*")) {
+                    continue;
+                }
+
+                itemsList.add(correctedItem);
+                calculatedSum += price;
+            }
+*/
+
+        }
         itemsList = extractArticlesWithLLM(ocrResult);
 
         // Falls kein expliziter Gesamtbetrag gefunden wurde:
