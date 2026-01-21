@@ -7,6 +7,7 @@ import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.languagetool.rules.RuleMatch;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -50,8 +54,8 @@ public class OCRService {
     //@Value("${tesseract.charWhiteList}")
     //private String charWhiteList;
 
-    //@Value("${dictionary.file}")
-    //private String dictionaryFile;
+    @Value("${dictionary.file}")
+    private String dictionaryFile;
 
     @Value("${pattern.sumMatchPattern.regexp}")
     private String sumMatchPattern;
@@ -59,7 +63,7 @@ public class OCRService {
     private static final Logger logger = LoggerFactory.getLogger(OCRService.class);
     private final LevenshteinDistance levenshtein = new LevenshteinDistance();
     private Set<String> dictionary =  new HashSet<>();
-    private JLanguageTool langTool = new JLanguageTool(new German());
+    private final JLanguageTool langTool = new JLanguageTool(new German());
 
     /**
      * This method sorts a 2 D point array of type Point2f in order of top-left, top-right, bottom-right, bottom-left
@@ -267,9 +271,8 @@ public class OCRService {
             //ocrResult = tesseract.doOCR(imageOriginal);
             //String ocrResult =  tesseract.doOCR(new File(imagePath + "_filtered.jpg"));
             //dictionary = loadDictionary(System.getProperty("user.dir") + "/lib/de_DE.dic");
-            //dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
-            List<List<String>> ocrDetails = extractDetailsWithRegExPattern(ocrResult);
-            //List<List<String>> ocrDetails = extractDetailsWithLLM(ocrResult);
+            dictionary = loadDictionary(System.getProperty("user.dir") + dictionaryFile);
+            List<List<String>> ocrDetails = extractDetails(ocrResult);
             List<String> ocrText = new ArrayList<>();
             ocrText.add(ocrResult);
             result.add(ocrText);
@@ -291,7 +294,7 @@ public class OCRService {
      * @param ocrResult
      * @return detailsList
      */
-    public List<List<String>> extractDetailsWithRegExPattern(String ocrResult){
+    public List<List<String>> extractDetails(String ocrResult){
         Pattern amountPattern = Pattern.compile(sumMatchPattern);
         List<List<String>> detailsList = new ArrayList<List<String>>();
 
@@ -303,7 +306,7 @@ public class OCRService {
 
         for (String line : lines) {
             // komische Woerter filtern --> erstmal ohne, weil bestimmte Trennzeichen doch wichtig sind
-            //String cleanedLine = fixOCRWord(line);
+            //String cleanedLine = fixOCRWords(line);
             String cleanedLine = line.replaceAll("\u00A0", " ");
             // Zuerst nach Gesamtbetrag suchen
             Matcher totalMatcher = amountPattern.matcher(cleanedLine.toLowerCase());
@@ -311,49 +314,45 @@ public class OCRService {
                 totalPrice = Double.parseDouble(totalMatcher.group(2).replace(",", "."));
                 continue;
             }
-/*
+
             // Dann Artikel pruefen
             // Artikel: Text + Preis (<= 99,99), keine "Summe" etc.
-            Pattern itemPattern = Pattern.compile("(.+?).*\\b(\\d+[,.]\\d{2}).*");
-            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
-            if (itemMatcher.find()) {
-                String item = itemMatcher.group(1).trim();
-                String priceStr = itemMatcher.group(2).replace(",", ".");
-                double price = Double.parseDouble(priceStr);
-                // Abgleich mit Worterbuch
-                //String correctedItem = correctOCRText(item);
-                // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
-                String correctedItem = item;
-
-                // Ausschluss bestimmter Worter als Artikel
-                if (correctedItem.toLowerCase().matches(".*(summe|" +
-                        "zahlung|" +
-                        "rückgeld|" +
-                        "steuer|" +
-                        "gesamt|" +
-                        "total|" +
-                        "kartenzahlung|" +
-                        "gesamtbetrag|" +
-                        "visa|" +
-                        "eur|" +
-                        "betrag|" +
-                        "brutto|" +
-                        "netto|" +
-                        "%).*")) {
-                    continue;
-                }
-
-                itemsList.add(correctedItem);
-                calculatedSum += price;
-            }
-*/
+//            Pattern itemPattern = Pattern.compile("(.+)\\b.*\\b(\\d+[,.]\\d{2}).*");
+//            Matcher itemMatcher = itemPattern.matcher(cleanedLine);
+//            if (itemMatcher.find()) {
+//                String item = itemMatcher.group(1).trim();
+//                String priceStr = itemMatcher.group(2).replace(",", ".");
+//                double price = Double.parseDouble(priceStr);
+//                // Abgleich mit Worterbuch
+//                //String correctedItem = correctOCRText(item);
+//                // Funktioneirt noch am Besten, weil Artikel nicht immer klassische Woerter sind
+//                String correctedItem = item;
+//
+//                // Ausschluss bestimmter Worter als Artikel
+//                if (correctedItem.toLowerCase().matches(".*(summe|" +
+//                        "zahlung|" +
+//                        "rückgeld|" +
+//                        "steuer|" +
+//                        "gesamt|" +
+//                        "total|" +
+//                        "kartenzahlung|" +
+//                        "gesamtbetrag|" +
+//                        "visa|" +
+//                        "eur|" +
+//                        "betrag|" +
+//                        "brutto|" +
+//                        "netto|" +
+//                        "%).*")) {
+//                    continue;
+//                }
+//
+//                itemsList.add(correctedItem);
+//                calculatedSum += price;
+//            }
 
         }
-        itemsList = extractArticlesWithLLM(ocrResult);
+        itemsList = extractArticlesWithLLM(ocrResult); // Liste der Artikel immer ueber LLM
 
-        // Falls kein expliziter Gesamtbetrag gefunden wurde:
-        //double finalTotal = (totalPrice > 0) ? totalPrice : calculatedSum; --> Artikel-Summe nehmen
-        //double finalTotal = totalPrice; --> Notfalls einfach den Startwert "-1" nehmen
         double  finalTotal = totalPrice; // Pattern hat gegriffen
         if (totalPrice == -1.0) {
             finalTotal = extractPriceWithLLM(ocrResult); // Pattern hat nicht gegriffen, dann ueber LLM
@@ -485,176 +484,115 @@ public class OCRService {
     }
 
     /**
-     * Extract article and amount from the receipt copy via LLM
-     * @param ocrResult
-     * @return detailsList
+     * Method to repair broken words by ocr. In case the word was separated. Combines both words if they were found
+     * in a dictionary.
+     * @param line - a line of text
+     * @return line - a corrected line
      */
-//    public List<List<String>> extractDetailsWithLLM(String ocrResult){ // Alternative zu extractDetailsWithRegExPattern
-//        List<List<String>> detailsList = new ArrayList<List<String>>();
-//        List<String> itemsList = new ArrayList<>();
-//        String posibleSum;
-//        String finalTotal = "-1.0";
-//        String url = "http://localhost:11434/api/generate";
-//        if (!ocrResult.isEmpty()) {
-//            // Vorverarbeitung des ocrResults
-//            Normalizer.normalize(ocrResult, Normalizer.Form.NFKC);
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set("Content-Type", "application/json");
-//            Map<String, Object> body = new HashMap<>();
-//            body.put("model", "deepseek-r1:8b");
-//            body.put("prompt", "Antworte nur in dem folgenden JSON-Format: (" +
-//                    " 'sum': <Betrag als Double> ) Frage: Analysiere den" +
-//                    " Kassenbons, welcher mit OCR erfasst wurde:" + ocrResult +
-//                    " Ich möchte das du mir den Gesamtbetrag aus dem OCR-Text raussuchst.");
-//            body.put("format", "json");
-//            body.put("keep_alive", "0s");
-//            Map<String, Object> options = new HashMap<>();
-//            options.put("temperature", 0);
-//            body.put("options", options);
-//            body.put("stream", false);
-//            logger.info("AI-Request-Body sent: " + body);
-//            HttpEntity<?> entity = new HttpEntity<>(body, headers);
-//            try {
-//                RestTemplate restTemplate = new RestTemplate();
-//                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-//                posibleSum = response.getBody();
-//                logger.info("AI-Request-Body receive: " + posibleSum);
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                try {
-//                    JsonNode rootNode = objectMapper.readTree(posibleSum);
-//                    JsonNode responseNode = rootNode.path("response");
-//                    JsonNode innerNode = objectMapper.readTree(responseNode.asText());
-//                    JsonNode sumNode = innerNode.path("sum");
-//                    finalTotal = sumNode.asText();
-//                } catch(Exception ex) {
-//                    logger.error("Failed to parse String to JSON: " + ex.getMessage());
-//                }
-//            } catch (Exception ex) {
-//                logger.error(ex.getMessage());
-//            }
-//        }
-//        List<String> finalAmount = new ArrayList<>();
-//        finalAmount.add(finalTotal);
-//        detailsList.add(finalAmount);
-//        detailsList.add(itemsList);
-//        return detailsList;
-//    }
-
-//    private String fixOCRWord(String word) {
-//        String[] parts = word.split("\\s+");
-//        if (parts.length <= 1) return word;
-//
-//        // Alle Nachbarteile durchprobieren
-//        for (int i = 0; i < parts.length - 1; i++) {
-//            String joined = parts[i] + parts[i + 1];
-//            if (dictionary.contains(joined)) {
-//                // Ersetzt die zwei Teile durch das zusammengefuegte Wort
-//                StringBuilder sb = new StringBuilder();
-//                for (int j = 0; j < parts.length; j++) {
-//                    if (j == i) {
-//                        sb.append(joined).append(" ");
-//                        j++; // den naechsten Teil überspringen
-//                    } else {
-//                        sb.append(parts[j]).append(" ");
-//                    }
-//                }
-//                return sb.toString().trim();
-//            }
-//        }
-//        return word;
-//    }
-
-    //private String correctOCR(String word) {
-    //    String bestMatch = word;
-    //    int bestDistance = Integer.MAX_VALUE;
-    //    int maxDistance = Math.max(2, (int)(word.length() * 0.5)); // 50% der Laenge
-
-    //    for (String item : dictionary) {
-    //        item = item.trim();
-    //        if (item.length() < 3 || item.equals(word)) continue;
-
-    //        int distance = levenshtein.apply(word.toUpperCase(), item.toUpperCase());
-            // Schwellwert 40% des Wortes
-    //        if (distance < bestDistance && distance <= maxDistance) {
-    //            bestDistance = distance;
-    //            bestMatch = item;
-    //        }
-    //    }
-    //    return bestMatch;
-    //}
+    private String fixOCRWords(String line) {
+        String[] parts = line.split("\\s+");
+        if (parts.length <= 1) {
+            return line;
+        }
+        // Alle Nachbarteile durchprobieren
+        for (int i = 0; i < parts.length - 1; i++) {
+            parts = line.split("\\s+");
+            if (i == parts.length) {
+                break;
+            }
+            String joined = parts[i] + parts[i + 1];
+            if (dictionary.contains(joined)) {
+                // Ersetzt die zwei Teile durch das zusammengefuegte Wort
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < parts.length; j++) {
+                    if (j == i) {
+                        sb.append(joined).append(" ");
+                        j++; // den naechsten Teil überspringen
+                    } else {
+                        sb.append(parts[j]).append(" ");
+                    }
+                }
+                line = sb.toString().trim();
+            }
+        }
+        return line;
+    }
 
     /**
-     * Prüft ein einzelnes Wort und gibt den besten LanguageTool-Vorschlag zurück.
-     * Wenn das Wort korrekt ist, wird es unverändert zurückgegeben.
+     * Checks a single word using the Levenshtein from org.apache and its own dictionary from application.properties.
+     * @param word - word to be checked
+     * @return bestMatch - the corrected word
      */
-    //public String correctOCR(String word) {
-    //    try {
-            // LanguageTool prueft das Wort
-    //        List<RuleMatch> matches = langTool.check(word);
+    private String correctOCRbyOwnDict(String word) {
+        String bestMatch = word;
+        int bestDistance = Integer.MAX_VALUE;
+        int maxDistance = Math.max(2, (int)(word.length() * 0.5)); // 50% der Laenge
 
-    //        if (matches.isEmpty()) {
+        for (String item : dictionary) {
+            item = item.trim();
+            if (item.length() < 3 || item.equals(word)) {
+                continue;
+            }
+            int distance = levenshtein.apply(word.toUpperCase(), item.toUpperCase());
+             // Schwellwert des Wortes
+            if (distance < bestDistance && distance <= maxDistance) {
+                bestDistance = distance;
+                bestMatch = item;
+            }
+        }
+        return bestMatch;
+    }
+
+    /**
+     * Checks a single word using the LanguageTool, returns the best tool suggestion. If the word is correct, it is returned unchanged
+     * @param word - word to be checked
+     * @return word - the corrected word
+     */
+    public String correctOCRbyLanguageTool(String word) {
+        try {
+            // LanguageTool prueft das Wort
+            List<RuleMatch> matches = langTool.check(word);
+
+            if (matches.isEmpty()) {
                 // Keine Fehler dann Wort ist korrekt
-    //            return word;
-    //        }
+                return word;
+            }
 
             // LanguageTool liefert Vorschlaege fuer moegliche Korrekturen
-    //        for (RuleMatch match : matches) {
-    //            List<String> suggestions = match.getSuggestedReplacements();
-    //            if (!suggestions.isEmpty()) {
+            for (RuleMatch match : matches) {
+                List<String> suggestions = match.getSuggestedReplacements();
+                if (!suggestions.isEmpty()) {
                     // Nimm den ersten Vorschlag (besten Treffer)
-    //                return suggestions.get(0);
-    //            }
-    //        }
+                    return suggestions.get(0);
+                }
+            }
 
-    //    } catch (IOException e) {
-    //        e.printStackTrace();
-    //    }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Keine Vorschläge oder Fehler danOriginal zurueckgeben
-    //    return word;
-    //}
+        return word;
+    }
 
-//    public String correctOCRText(String text) {
-//        String[] words = text.split("\\s+");
-//        StringBuilder corrected = new StringBuilder();
-//
-//        for (String word : words) {
-//            String fixed = correctOCR(word); // hier deine Levenshtein-Methode
-//            corrected.append(fixed).append(" ");
-//        }
-//
-//        return corrected.toString().trim();
-//    }
+    /**
+     * Checks the entire text to correct words
+     * @param text - text to be checked
+     * @return corrected text
+     */
+    public String correctOCRText(String text) {
+        String[] words = text.split("\\s+");
+        StringBuilder corrected = new StringBuilder();
 
-//    public String correctOCR(String word) {
-//        try {
-//            List<RuleMatch> matches = langTool.check(word);
-//
-//            if (matches.isEmpty()) {
-//                return word;
-//            }
-//
-//            String bestSuggestion = word;
-//            int bestDistance = Integer.MAX_VALUE;
-//
-//            for (RuleMatch match : matches) {
-//                for (String suggestion : match.getSuggestedReplacements()) {
-//                    int distance = levenshteinDistance(word, suggestion);
-//                    if (distance < bestDistance) {
-//                        bestDistance = distance;
-//                        bestSuggestion = suggestion;
-//                    }
-//                }
-//            }
-//
-//            return bestSuggestion;
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return word;
-//    }
+        for (String word : words) {
+            String fixed = correctOCRbyLanguageTool(word);
+            //String fixed = correctOCRbyOwnDict(word); // hier Levenshtein-Methode
+            corrected.append(fixed).append(" ");
+        }
+
+        return corrected.toString().trim();
+    }
+
 
     // Standard-Levenshtein-Distanzberechnung / gibt aber auch Bibliotheken... zu spaet gemerkt.... -.-
 //    private int levenshteinDistance(String a, String b) {
@@ -676,21 +614,26 @@ public class OCRService {
 //        return dp[a.length()][b.length()];
 //    }
 
-//    private Set<String> loadDictionary(String path) {
-//        Set<String> dict = new HashSet<>();
-//        List<String> lines = null;
-//        try {
-//            lines = Files.readAllLines(Paths.get(path));
-//        } catch (IOException e) {
-//            logger.error(e.getMessage());
-//            System.out.println(e.getMessage());
-//        }
-//        for (String line : lines) {
-//            line = line.trim();
-//            if (!line.isEmpty() && !line.startsWith("#")) {
-//                dict.add(line);
-//            }
-//        }
-//        return dict;
-//    }
+    /**
+     * Load a given dictionary to a set of strings
+     * @param path - path to a dictionary
+     * @return set of string
+     */
+    private Set<String> loadDictionary(String path) {
+        Set<String> dict = new HashSet<>();
+        List<String> lines = null;
+        try {
+            lines = Files.readAllLines(Paths.get(path));
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            System.out.println(e.getMessage());
+        }
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty() && !line.startsWith("#")) {
+                dict.add(line);
+            }
+        }
+        return dict;
+    }
 }
