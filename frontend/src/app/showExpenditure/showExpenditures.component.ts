@@ -23,10 +23,8 @@ export class ShowExpendituresComponent {
   constructor(private expenditureService: ExpenditureService, private router: Router) {
     try{
       if (history.state && history.state.expenditure && history.state.householdMember) {
-        console.log(`HALLOE`);
         const { expenditure, householdMember } = history.state;
         this.householdMember = householdMember;
-        console.log(`Mal gucken... ${this.householdMember.address}`);
       } else {
         console.log("Konnte history.state nicht verarbeiten")
       }

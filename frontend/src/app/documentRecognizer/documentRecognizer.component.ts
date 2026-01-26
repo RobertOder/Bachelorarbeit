@@ -45,17 +45,34 @@ export class DocumentRecognizerComponent implements AfterViewInit {
     // Return Array
     let rect = [null, null, null, null];
 
-    // Sum the Arrayvalues (x+y)
-    const sum = points.map(p => p.x + p.y);
-    // Spread-Operator spread the Array + return Index of max/min values + Output indexed Array-Content
-    rect[0] = points[sum.indexOf(Math.min(...sum))]; // oben-links
-    rect[2] = points[sum.indexOf(Math.max(...sum))]; // unten-rechts
+    // Sorts all Puinks by their x values
+    points.sort((a, b) => a.x - b.x);
 
-    // Difference the Arrayvalues (y-x)
-    const diff = points.map(p => p.y - p.x);
-        // Spread-Operator spread the Array + return Index of max/min values + Output indexed Array-Content
-    rect[1] = points[diff.indexOf(Math.min(...diff))]; // oben-rechts
-    rect[3] = points[diff.indexOf(Math.max(...diff))]; // unten-links
+    let leftMost  = [points[0], points[1]]; // Left Points Part
+    let rightMost = [points[2], points[3]]; // Rights Points Part
+
+    // If tl.x and br.x same, then check side
+    if (leftMost[1].x == rightMost[0].x) {
+      if (leftMost[1].y > rightMost[0].y) {
+        leftMost  = [points[0], points[2]]; // Left Points Part
+        rightMost = [points[1], points[3]]; // Rights Points Part
+      }
+    }
+
+    // Sort left Part by y values
+    leftMost.sort((a, b) => a.y - b.y);
+    let tl = leftMost[0]; // define correct tl
+    let bl = leftMost[1]; // define correct bl
+
+    // Sort right Part by y values
+    rightMost.sort((a, b) => a.y - b.y);
+    let tr = rightMost[0]; // define correct tr
+    let br = rightMost[1]; // define correct br
+
+    rect[0] = tl;
+    rect[1] = tr;
+    rect[2] = br;
+    rect[3] = bl;
 
     return rect as any[]; //  any[] because of the typing for cv... otherwise it haven't be recognized
   }

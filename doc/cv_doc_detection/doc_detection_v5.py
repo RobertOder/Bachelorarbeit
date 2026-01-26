@@ -3,22 +3,41 @@ import numpy as np
 
 def order_points(pts):
     pts = pts.reshape(4, 2)
-    # leeres Ergebnis-Arra
-    rect = np.zeros((4, 2), dtype="float32")
-    # Vektor mit 4 Summen, summiert x + y, denn z.B. oben links sind x und y klein
-    s = np.sum(pts, axis=1) # axis=0 summiert beide Spalten (x-gesamt und y-gesamt) / axis=1 summert pro Zeile (vier mal x+y)
-    # Berechnet x - y für jeden Punkt
-    # Punkt oben-rechts ist x groß, y klein
-    # Für unten-links ist x klein, y groß (negativ)
-    diff = np.diff(pts, axis=1)
-    #print(f'Größe des pts: {len(pts)} with values {pts[0]}, {pts[1]}, {pts[2]}, {pts[3]} und s: {len(s)} und argmin: {numpy.argmin(s)} with value {s[0]}, {s[1]}, {s[2]}, {s[3]}')
-    # Standard-OpenCV-Koordinaten (0,0 oben links)
-    rect[0] = pts[np.argmin(s)]        # oben-links / liefert Index des kleinsten x+y
-    rect[2] = pts[np.argmax(s)]        # unten-rechts / liefert Index des groessten x+y
-    rect[3] = pts[np.argmin(diff)]     # unten-links / liefert Index des kleinsten x-y
-    rect[1] = pts[np.argmax(diff)]     # oben-rechts / lifert Index des groessten x-y
+    # Sortiert Punkte nach x
+    # pst[:, 0] -> Alle Zeilen und Spalte 0 gibt alle X-WErte
+    # tps[(idex),:] --> wende diese Reihenfolge auf alle Punkte an  
+    xSorted = pts[np.argsort(pts[:, 0]), :]
 
-    return rect
+    # Linke und rechte Punkte trennen
+    leftMost = xSorted[:2, :]   # die 2 links und alle Spalten
+    rightMost = xSorted[2:, :]  # die 2 rechts und alle Spalten
+
+    # Falls Raute, dann x werte bei tr und bl gleich, hier die inneren 
+    # Werte nach x-sortierung nach y pruefen, notfalls tauschen
+    # --> hat fast kleine Relevanz bei float, sonst doch über mittelpunkt und winkel...
+    # print(f"Ist {leftMost[1][0]} mit {rightMost[0][0]} gleich")
+    if int(leftMost[1][0]) == int(rightMost[0][0]): 
+        if leftMost[1][1] > rightMost[0][1]:
+            leftMost = xSorted[0, 2]   # die 2 links und alle Spalten
+            rightMost = xSorted[1, 3]  # die 2 rechts und alle Spalten
+            print("tr.x und bl.x gleich!!! Zuordnung der rechten / linken Gruppe anhand y getauscht")
+        else:
+            print("war doch richtig. ############## :)")
+
+    # linke Punkte (oben-Links und unten-Links) nach y sortieren
+    # pst[:, 1] -> Alle Zeilen und Spalte 1 gibt alle y-Werte
+    # tps[(index),:] --> wende diese reihenfolge auf alle (die zwei) Punkte an
+    (tl, bl) = leftMost[np.argsort(leftMost[:, 1]), :]
+
+    # rechte Punkte (Oben-Rechts und unten-Rechts) anhand Abstand zu tl bestimmen
+    # norm = laenge des vectors = abstand (euklidische distanz)
+    # (rightMost - tl, axis=1) --> [dx, dy] = sqrt(dx² + dy²)
+    # Abstand von tl -> Punkt1 / Abstand von tl -> Punkt 2 | UND DANN Sortieren
+    #D = np.linalg.norm(rightMost - tl, axis=1)
+    #(br, tr) = rightMost[np.argsort(D)[::-1]]  # größere Distanz -> br, kleinere -> tr
+    (tr, br) = rightMost[np.argsort(rightMost[:, 1]), :]
+
+    return np.array([tl, tr, br, bl], dtype="float32")
 
 def detect_document_edges_from_camera():
     cap = cv2.VideoCapture(1)
@@ -75,7 +94,7 @@ def detect_document_edges_from_camera():
             # === PERSPEKTIV-ENTZERRUNG ===
             rect = order_points(doc_contour)
 
-            (tl, bl, br, tr) = rect
+            (tl, tr, br, bl) = rect
 
             widthA = np.linalg.norm(br - bl) # Abstand zwischen unten-rechts und unten-links (untere Kante)
             widthB = np.linalg.norm(tr - tl) # Abstand zwischen oben-rechts und oben-links (obere KAnte)
@@ -93,11 +112,13 @@ def detect_document_edges_from_camera():
                 [0, maxHeight - 1] # unten-links
             ], dtype="float32")
 
-            # Punkte, als neue Grenzwerte des Bildes definieren
-            srcrec = np.array([tl, tr, br, bl], dtype="float32")
-            M = cv2.getPerspectiveTransform(srcrec, dst) # Berechnet eine 3×3 Projektionsmatrix M, die einen Punkt (x,y) im Quellbild nach (x',y') im Zielbild abbildet
+            # dst beinhaltet Zielkoordinaten, mit neuen Punkten, die das Ziel-Bild definieren
+            # rect beinhaltet die zuvor sortierten Punkte
+            # Berechnet eine 3×3 Projektionsmatrix M, die einen Punkt (x,y) im Quellbild nach (x',y') im Zielbild abbildet
+            M = cv2.getPerspectiveTransform(rect, dst)
             # Originalbild in eine Draufsicht transformieren
-            warped = cv2.warpPerspective(frame, M, (maxWidth, maxHeight)) # wendet Matrix M auf das Bild frame an und erzeugt ein neues Bild mit Größe (maxWidth, maxHeight)
+            # wendet Matrix M auf das Bild frame an und erzeugt ein neues Bild mit Größe (maxWidth, maxHeight)
+            warped = cv2.warpPerspective(frame, M, (maxWidth, maxHeight))
             cv2.imshow("Scanned Document", warped)
 
         cv2.imshow("Detected document contour", canny_color)

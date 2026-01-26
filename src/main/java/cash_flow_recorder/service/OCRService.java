@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.*;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,23 +72,32 @@ public class OCRService {
      * @return rect - Ordered points of type Point2f (OpenCV - Point as two dimensions (x,y) as 32bit Float)
      */
     private static Point2f[] orderPoints(Point2f[] points) {
-        Point2f[] rect = new Point2f[4]; // Define return var
 
-        // Sum and Difference Values for calculate the corners
-        double[] sum = new double[4];
-        double[] diff = new double[4];
-        for (int i = 0; i < 4; i++) {
-            sum[i] = points[i].x() + points[i].y();
-            diff[i] = points[i].x() - points[i].y();
+        // SSorts all Puinks by their x values (in-place)
+        Arrays.sort(points, (a, b) -> Float.compare(a.x(), b.x()));
+
+        Point2f[] leftMost = { points[0], points[1] }; // Left Points Part
+        Point2f[] rightMost = { points[2], points[3] }; // Rights Points Part
+
+        // If tl.x and br.x same, then check side
+        if (leftMost[1].x() == rightMost[0].x()) {
+            if (leftMost[1].y() > rightMost[0].y()) {
+                leftMost  = new Point2f[]{ points[0], points[2] }; // Left Points Part
+                rightMost = new Point2f[]{ points[1], points[3] }; // Rights Points Part
+            }
         }
-        // assign the calulated values to the return var
-        rect[0] = points[argMin(sum)];  // top-left
-        rect[2] = points[argMax(sum)];  // bottom-right
-        // changed / different from doc/python_v4 - otherwise mirrored, actualy I dont know why :( ?!
-        rect[3] = points[argMin(diff)]; // top-right - (origin index 1)
-        rect[1] = points[argMax(diff)]; // bottom-left - (origin index 3)
 
-        return rect;
+        // Sort left Part by y values
+        Arrays.sort(leftMost, (a, b) -> Float.compare(a.y(), b.y()));
+        Point2f tl = leftMost[0]; // define correct tl
+        Point2f bl = leftMost[1]; // define correct bl
+
+        // Sort right Part by y values
+        Arrays.sort(rightMost, (a, b) -> Float.compare(a.y(), b.y()));
+        Point2f tr = rightMost[0]; // define correct tr
+        Point2f br = rightMost[1]; // define correct br
+
+        return new Point2f[]{ tl, tr, br, bl };
     }
 
     /**
@@ -201,6 +211,7 @@ public class OCRService {
                     indexer.release(); // release the indexer ressource
 
                     // Order Points to equalize the image-perspective
+                    // changed / different from doc/python_v4 - otherwise mirrored ?!
                     Point2f[] ordered = orderPoints(pts);
                     Point2f tl = ordered[0];
                     Point2f tr = ordered[1];
