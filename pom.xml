@@ -8,7 +8,7 @@
 		<version>3.5.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>de.bht-berlin.paf</groupId>
+	<groupId>cash_flow_recorder</groupId>
 	<artifactId>cash-flow-recorder</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>cash-flow-recorder</name>
