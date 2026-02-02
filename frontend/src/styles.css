@@ -230,57 +230,62 @@ input:valid:not([type=submit]){
 	background: var(--Formular-Valid-bg);
 }
 
-/* ------------------------------------ Media-Querry fuer besonders schmale Displays ------ */
+/* ------ Media-Querry fuer besonders schmale Displays ------ */
 @media screen and (max-device-width: 480px){
 
-    /* --- Farbanpassung für bessere Lesbarkeit bei z.B. Mobilgeraeten im Hellen--- */
-    :root{
-        line-height: 1;
-        color: var(--txt-color_black);
-    }
+  /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
+  main{
+    display: block;
+  }
 
-    p{
-        margin-left: 7%;
-        margin-right: 7%;
-        line-height: 1.5;
-        text-align: justify;
-    }
+  /* --- Farbanpassung für bessere Lesbarkeit bei z.B. Mobilgeraeten im Hellen--- */
+  :root{
+    line-height: 1;
+    color: var(--txt-color_black);
+  }
 
-    /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
-    main{
-        display: block;		 
-    }
+  p{
+    margin-left: 7%;
+    margin-right: 7%;
+    line-height: 1.5;
+    text-align: justify;
+  }
 
-    /* --- Header-Schrift der Website statische groesse --- */
-    #top{
-        font-size: 2rem;
-    }
+  /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
+  main{
+    display: block;
+  }
+
+  /* --- Header-Schrift der Website statische groesse --- */
+  #top{
+    font-size: 2rem;
+  }
 
     /* --- Artikel Ueberschriften erhalten eine statische Groesse --- */
-    article h2{
-        color: var(--txt-color_black);
-        margin-top: 3rem;
-        margin-bottom: 2rem;
-        font-size: 2rem;
-    }
+  article h2{
+    color: var(--txt-color_black);
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+  }
 
-    /* --- Navigationsleiste nicht mehr sticky --- */
-    nav{
-	    position: static;
-    }
+  /* --- Navigationsleiste nicht mehr sticky --- */
+  nav{
+	  position: static;
+  }
 
-    /* --- groessenverhaeltnisse der Navigationsleiste anpassen --- */
-    nav li{
-        margin-top: 2rem;
-    }
+  /* --- groessenverhaeltnisse der Navigationsleiste anpassen --- */
+  nav li{
+    margin-top: 2rem;
+  }
 
-    nav a{
-        font-size: 1rem;
-    }
+  nav a{
+    font-size: 1rem;
+  }
 
-    /* --- Bilder-Groesse statisch --- */
-    img{
-        width: 35em;
-    }
+  /* --- Bilder-Groesse statisch --- */
+  img{
+    width: 35em;
+  }
 
 }
