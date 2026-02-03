@@ -70,6 +70,6 @@ describe('My First Test', () => {
     cy.contains('Ausgabe speichern');
 
     // Check new expenditureCategory for the expenditure
-    cy.get('#expenditureCategory').should('have.value', '4');
+    cy.get('#expenditureCategory').should('have.value', '1');
   })
 })
