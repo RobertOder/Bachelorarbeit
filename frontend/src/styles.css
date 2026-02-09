@@ -150,6 +150,7 @@ a[href="#top"] {
 table {
   border-spacing: 0;
   line-height: 175%;
+  width: 100%
 }
 
 th,
