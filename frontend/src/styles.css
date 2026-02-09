@@ -157,6 +157,7 @@ th,
 td {
   border-collapse: collapse;
   border: none;
+  padding-right: 0.5rem;
   border-bottom: 1px solid var(--txt-color_3);
 }
 
@@ -249,11 +250,6 @@ input:valid:not([type=submit]){
 /* ------ Media-Querry fuer besonders schmale Displays ------ */
 @media screen and (max-device-width: 480px) {
 
-  /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
-  main {
-    display: block;
-  }
-
   /* --- Farbanpassung für bessere Lesbarkeit bei z.B. Mobilgeraeten im Hellen--- */
   :root {
     line-height: 1;
@@ -272,6 +268,57 @@ input:valid:not([type=submit]){
     display: block;
   }
 
+  article {
+    max-width: 98%;
+    min-width: 0;
+    padding-bottom: 2rem;
+  }
+
+  /* --- Formulare anpassen --- */
+  form {
+    min-width: 100%;
+  }
+
+  fieldset {
+    width: 100%;
+  }
+
+  fieldset > p {
+    margin-right: 50px;
+  }
+
+  label {
+    width: 50%;
+    padding-top: 0.1rem;
+    padding-right: 5%;
+  }
+
+  input {
+    width: 50%;
+    margin-bottom: 6%;
+  }
+
+  /* --- Tabellen anpassen --- */
+
+  .hide-mobile {
+    display: none;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    overflow-wrap: break-word;
+  }
+
+  /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
+  main {
+    display: block;
+  }
+
   /* --- Header-Schrift der Website statische groesse --- */
   #top {
     font-size: 2rem;
@@ -280,9 +327,9 @@ input:valid:not([type=submit]){
     /* --- Artikel Ueberschriften erhalten eine statische Groesse --- */
   article h2 {
     color: var(--txt-color_black);
-    margin-top: 3rem;
+    margin-top: 1rem;
     margin-bottom: 2rem;
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   /* --- Navigationsleiste nicht mehr sticky --- */

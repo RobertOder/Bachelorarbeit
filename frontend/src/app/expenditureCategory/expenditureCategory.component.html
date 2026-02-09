@@ -29,10 +29,11 @@
     </article>
     <article>
       <h2>Aktuelle Kategorien</h2>
+       <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
-                    <th>Nr</th>
+                    <th class="hide-mobile">Nr</th>
                     <th>Name</th>
                     <th>Monatslimit</th>
                     <th>Monatssumme</th>
@@ -42,7 +43,7 @@
             </thead>
             <tbody *ngFor="let myHousehold of households">
                 <tr *ngFor="let myCategory of myHousehold.expenditureCategories">
-                  <td>{{myCategory.id}}</td>
+                  <td class="hide-mobile">{{myCategory.id}}</td>
                   <td>{{myCategory.name}}</td>
                   <td class="text-center">{{myCategory.upperLimit}}€</td>
                   <td class="text-center">{{getCurrentMonth(myCategory.id)}}€</td>
@@ -54,5 +55,6 @@
                 </tr>
             </tbody>
         </table>
+       </div>
     </article>
   </main>

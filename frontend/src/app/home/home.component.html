@@ -17,7 +17,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th class="hide-mobile">ID</th>
                     <th>Vorname</th>
                     <th>Name</th>
                     <th>Aktionen</th>
@@ -25,7 +25,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let householdMember of householdMembers">
-                    <td>{{householdMember.id}}</td>
+                    <td class="hide-mobile">{{householdMember.id}}</td>
                     <td>{{householdMember.firstname}}</td>
                     <td>{{householdMember.name}}</td>
                     <td>

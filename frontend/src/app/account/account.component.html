@@ -34,7 +34,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nr</th>
+                    <th class="hide-mobile">Nr</th>
                     <th>Name</th>
                     <th>Kontostand</th>
                     <th>Aktionen</th>
@@ -42,7 +42,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let myAccount of householdMember.accounts">
-                  <td>{{myAccount.id}}</td>
+                  <td class="hide-mobile">{{myAccount.id}}</td>
                   <td>{{myAccount.name}}</td>
                   <td class="text-center">{{myAccount.balance}}€</td>
                   <td>
