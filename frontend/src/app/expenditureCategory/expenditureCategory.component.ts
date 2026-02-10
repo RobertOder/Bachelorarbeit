@@ -22,11 +22,23 @@ export class ExpenditureCategoryComponent {
   // myVar: any;
   households: Household[] = [];
   currentExpendituresSum: { [key: number]: string } = {};
+  diagramColors = [
+    'red',
+    'green',
+    'yellow',
+    'blue',
+    'fuchsia',
+    'aqua',
+    'white',
+    'orange',
+    'purple',
+    'teal'
+  ];
 
-  constructor(private householdMemberService: HouseholdMemberService, private householdService: HouseholdService, private expenditureCategoryService: ExpenditureCategoryService) { 
+  constructor(private householdMemberService: HouseholdMemberService, private householdService: HouseholdService, private expenditureCategoryService: ExpenditureCategoryService) {
     this.householdMember = history.state;
   }
-  
+
   ngOnInit(): void {
     this.expenditureCategory = new ExpenditureCategory();
     this.getHouseholdsAndCurrentExpendituresSum();
@@ -67,6 +79,28 @@ export class ExpenditureCategoryComponent {
     return this.currentExpendituresSum[categoryId] !== undefined
       ? this.currentExpendituresSum[categoryId]
       : 'Lädt...';
+  }
+
+  getDiagramBackground(expenditureCategories: ExpenditureCategory[]): string {
+    let total = 0;
+    for (const expCat of expenditureCategories) {
+      total += Number(this.currentExpendituresSum[expCat.id]);
+    }
+    console.log("total: " + total);
+    let calc = 0;
+    const parts: string[] = [];
+    for (let i = 0; i < expenditureCategories.length; i++) {
+      const expCat = expenditureCategories[i];
+      const start = (calc / total) * 100;
+      calc += Number(this.currentExpendituresSum[expCat.id]);
+      const end = (calc / total) * 100;
+
+      const color = this.diagramColors[i % this.diagramColors.length];
+
+      parts.push(`${color} ${start}% ${end}%`);
+    }
+
+    return `conic-gradient(${parts.join(', ')})`;
   }
 
 }

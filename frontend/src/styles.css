@@ -3,7 +3,7 @@
 /* ==================================== Universal Selektor ================================ */
 * {
   box-sizing: border-box;
-  /* globale Varialblen */
+  /* globale Varialblen
   --bg-color_1: rgb(255, 210, 198);
   --bg-color_2: rgb(255, 226, 198);
   --bg-color_3: rgb(126, 155, 161);
@@ -22,6 +22,25 @@
   --Formular-Error-bg: rgb(255, 182, 182);
   --Formular-Valid: rgb(0, 255, 0);
   --Formular-Valid-bg: rgb(187, 255, 187);
+  */
+  --bg-color_1: rgb(255, 210, 198);
+  --bg-color_2: rgb(230, 230, 230);
+  --bg-color_3: rgb(126, 155, 161);
+  --bg-color_4: rgb(123, 123, 123);
+  --bg-color_white: rgb(255, 255, 255);
+  --txt-color_1: rgb(50, 10, 0);
+  --txt-color_2: rgb(50, 25, 0);
+  --txt-color_3: rgb(1, 30, 36);
+  --txt-color_4: rgb(0, 39, 17);
+  --txt-color_black: rgb(0, 0, 0);
+  --Base_1: rgb(204, 204, 204);
+  --Base_2: rgb(82, 40, 0);
+  --Base_3: rgb(1, 42, 50);
+  --Base_4: rgb(0, 58, 25);
+    --Formular-Error: rgb(255, 0, 0);
+    --Formular-Error-bg: rgb(255, 182, 182);
+    --Formular-Valid: rgb(0, 255, 0);
+    --Formular-Valid-bg: rgb(187, 255, 187);
 }
 
 /* ------------------------------------ Wurzel - Eigenschaften ---------------------------- */
@@ -61,8 +80,13 @@ h3 {
   margin-bottom: 2rem;
 }
 
+h3 {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
 #top {
-  font-size: 6vw;
+  font-size: 4vw;
   color: var(--bg-color_4);
 }
 
@@ -79,6 +103,7 @@ nav {
 	flex-flow: row wrap;
 	justify-content: center;
 	align-content: center;
+	z-index: 1;
 }
 
 /* Flex-Items + Flex-Container */
@@ -245,6 +270,25 @@ input:invalid {
 input:valid:not([type=submit]){
 	border: 1px solid var(--Formular-Valid);
 	background: var(--Formular-Valid-bg);
+}
+
+/* ------ Kreisdiagramm ------ */
+/* https://www.mediaevent.de/css/conic-gradient.html
+ https://www.w3schools.com/cssref/func_conic-gradient.php
+ https://dev.to/madsstoumann/charts-in-css-1di1*/
+.diagram {
+  /*background: conic-gradient(
+    red 0% 35%,
+    green 35% 70%,
+    yellow 70% 100%
+  );*/
+  border-radius: 50%;
+  mask: radial-gradient(transparent 55%, black 56%);
+  width: 200px;
+  height: 200px;
+  z-index: 2;
+  margin-left: calc((100% - 200px) / 2);
+  margin-bottom: 5%;
 }
 
 /* ------ Media-Querry fuer besonders schmale Displays ------ */
