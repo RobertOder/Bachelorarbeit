@@ -27,11 +27,15 @@ public class ReceiptCopyService {
     private final ReceiptCopyRepo receiptCopyRepo;
     private final OCRService ocrService;
     private final Logger logger = LoggerFactory.getLogger(ReceiptCopyService.class);
+    private final ExpenditureService expenditureService;
+    private final HouseholdService householdService;
 
     @Autowired // Constructor Injection
-    public ReceiptCopyService(ReceiptCopyRepo receiptCopyRepo, OCRService ocrService) {
+    public ReceiptCopyService(ReceiptCopyRepo receiptCopyRepo, OCRService ocrService, ExpenditureService expenditureService, HouseholdService householdService) {
         this.receiptCopyRepo = receiptCopyRepo;
         this.ocrService = ocrService;
+        this.expenditureService = expenditureService;
+        this.householdService = householdService;
     }
 
     // CRUD-Operations for the entity receiptCopy
@@ -119,7 +123,7 @@ public class ReceiptCopyService {
      * @return Updated receiptCopy
      */
     public ReceiptCopy processReceipt(ReceiptCopy receiptCopy) {
-        receiptCopy.process(ocrService);
+        receiptCopy.process(ocrService, this, expenditureService);
         ReceiptCopy savedReceiptCopy = receiptCopyRepo.save(receiptCopy);
         if(savedReceiptCopy == null) {
             logger.error("Service: Failed to save receiptCopy");
@@ -133,9 +137,9 @@ public class ReceiptCopyService {
     public String processFindCategory(ReceiptCopy receiptCopy, Household household) {
         String url = "http://localhost:11434/api/generate";
         String posibleCategories = new String();
-        if (receiptCopy.getStatus() == ReceiptCopyStatus.TRANSLATED) {
+        if (receiptCopy.getStatus() == ReceiptCopyStatus.NEW) {
             if (household != null) {
-                List<ExpenditureCategory> expenditureCategoryList = household.getExpenditureCategories();
+                List<ExpenditureCategory> expenditureCategoryList = householdService.getExpenditureCategories(household.getId());
                 List<String> expenditureCategories = new ArrayList<>();
                 for (ExpenditureCategory expenditureCategory : expenditureCategoryList) {
                     expenditureCategories.add(expenditureCategory.getName());
@@ -186,7 +190,7 @@ public class ReceiptCopyService {
                 }
             }
         } else {
-            logger.warn("Service: Cant generate Categories, because Status of receiptCopy is not TRANSLATED");
+            logger.warn("Service: Cant generate Categories, because Status of receiptCopy is not NEW");
         }
         return posibleCategories;
     }

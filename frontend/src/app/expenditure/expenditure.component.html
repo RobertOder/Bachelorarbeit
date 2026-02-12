@@ -33,8 +33,8 @@
               </div>
               <div>
                 <label for="expenditureCategory">Kategorie: </label>
-                <select id="expenditureCategory">
-                  <option value="">0 - Bitte zuerst das Konto wählen...</option>
+                <select [disabled]="expenditure.id == null" id="expenditureCategory">
+                  <option value="">0 - Wird bei Analge automatisch zugewiesen...</option>
                   <option *ngFor="let expenditureCategory of expenditureCategories" [value]="expenditureCategory.id" [selected]="selectedExpenditureCategoryId === expenditureCategory.id">
                       {{expenditureCategory.id}} - {{expenditureCategory.name}}
                   </option>

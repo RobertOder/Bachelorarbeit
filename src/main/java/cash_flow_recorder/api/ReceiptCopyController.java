@@ -149,9 +149,18 @@ public class ReceiptCopyController {
             try {
                 JsonNode rootNode = objectMapper.readTree(posibleCategories);
                 JsonNode responseNode = rootNode.path("response");
-                //posibleCategories = responseNode.path("categories").asText();
+                posibleCategories = responseNode.path("categories").asText();
                 posibleCategories = responseNode.asText();
             } catch(Exception ex) {
+                logger.error("Failed to parse String to JSON: " + ex.getMessage());
+            }
+            ObjectMapper objectMapperOwnCategorie  = new ObjectMapper();
+            String ownCategorie = new String();
+            try {
+                JsonNode ownCatNode = objectMapperOwnCategorie.readTree(posibleCategories);
+                JsonNode responseNode = ownCatNode.path("categories");
+                ownCategorie = responseNode.get(0).asText();
+            } catch (Exception ex) {
                 logger.error("Failed to parse String to JSON: " + ex.getMessage());
             }
             logger.info("HTTP-Response: Found Categories for ReceiptCopy with id " + id + " ");

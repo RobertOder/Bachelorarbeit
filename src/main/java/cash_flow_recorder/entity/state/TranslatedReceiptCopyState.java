@@ -2,6 +2,7 @@ package cash_flow_recorder.entity.state;
 import cash_flow_recorder.entity.ReceiptCopy;
 import cash_flow_recorder.service.OCRService;
 import cash_flow_recorder.service.ReceiptCopyService;
+import cash_flow_recorder.service.ExpenditureService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,8 @@ public class TranslatedReceiptCopyState implements ReceiptCopyState {
      * @param ocrService The implemented OCR-Engine as Service
      */
     @Override
-    public void process(ReceiptCopy receiptCopy, OCRService ocrService) {
+    public void process(ReceiptCopy receiptCopy, OCRService ocrService, ReceiptCopyService receiptCopyService,
+                        ExpenditureService expenditureService) {
         logger.info("Receipt is already translated.");
         // ToDo - Implement next state for the automatic categorization
     }
