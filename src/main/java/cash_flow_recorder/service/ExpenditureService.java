@@ -149,9 +149,10 @@ public class ExpenditureService {
         ExpenditureCategory foundedexpenditureCategory = expenditureCategoryRepo.findById(categoryId).orElse(null);
         if (foundedexpenditureCategory == null) {
             logger.error("Service: Assign expenditureCategory to expenditure failed, no such expenditureCategory with id " + categoryId);
-            throw new RuntimeException("Assign expenditureCategory to expenditure failed, no such expenditureCategory with id " + categoryId);
+            //throw new RuntimeException("Assign expenditureCategory to expenditure failed, no such expenditureCategory with id " + categoryId);
+        } else {
+            expenditure.setExpenditureCategory(foundedexpenditureCategory);
         }
-        expenditure.setExpenditureCategory(foundedexpenditureCategory);
         Expenditure savedExpenditure = expenditureRepo.save(expenditure);
         if (savedExpenditure == null) {
             logger.error("Service: Assign expenditureCategory for expenditure failed");

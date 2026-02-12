@@ -5,12 +5,16 @@
             <fieldset>
               <legend>Ausgabe anlegen</legend>
               <div>
+                <label for="date">Datum: </label>
+                <input type="date" id="date" name="date" tabindex="1" required [(ngModel)]="expenditure.dateString">
+              </div>
+              <div>
                 <label for="amount">Ausgabe in €: </label>
-                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="z.B. 12.50" tabindex="1" required [(ngModel)]="expenditure.amount">
+                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="z.B. 12.50" tabindex="2" required [(ngModel)]="expenditure.amount">
               </div>
               <div>
                 <label for="description">Beschreibung: </label>
-                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="z.B. Parkticket" tabindex="2" required [(ngModel)]="expenditure.description">
+                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="z.B. Parkticket" tabindex="3" required [(ngModel)]="expenditure.description">
               </div>
               <div>
                 <label for="receiptCopy">Fotokopie hochladen: </label>
@@ -18,7 +22,7 @@
               </div>
               <div>
                 <label for="documentRecognizer">Fotokopie erstellen: </label>
-                <button [disabled]="selectedFileView !== null" type="button" title="documentRecognizer" (click)="documentRecognizer(householdMember, expenditure)">Dokument erfassen</button>
+                <button [disabled]="selectedFileView !== null" type="button" id="documentRecognizer" title="documentRecognizer" (click)="documentRecognizer(householdMember, expenditure)">Dokument erfassen</button>
               </div>
               <div>
                 <label for="account">Auf Konto buchen: </label>
@@ -33,8 +37,8 @@
               </div>
               <div>
                 <label for="expenditureCategory">Kategorie: </label>
-                <select [disabled]="expenditure.id == null" id="expenditureCategory">
-                  <option value="">0 - Wird bei Analge automatisch zugewiesen...</option>
+                <select [disabled]="selectedFileView !== null" id="expenditureCategory">
+                  <option value="">0 - Zuerst Konto wählen...</option>
                   <option *ngFor="let expenditureCategory of expenditureCategories" [value]="expenditureCategory.id" [selected]="selectedExpenditureCategoryId === expenditureCategory.id">
                       {{expenditureCategory.id}} - {{expenditureCategory.name}}
                   </option>
@@ -74,7 +78,7 @@
         </span>
         <div>
           <button type="button" class="button-right" title="Fotokopie löschen" (click)="deleteReceiptCopy(receiptCopy)">Fotokopie löschen</button>
-          <button type="button" class="button-left" title="OCR ausführen" (click)="translateReceiptCopy(receiptCopy)">OCR ausführen</button>
+          <button type="button" class="button-left" title="Inhalte auslesen" (click)="translateReceiptCopy(receiptCopy)">Inhalte Auslesen</button>
         </div>
         <label for="ocr-textfield-{{receiptCopy.id}}" class="textfieldlabel">OCR-Ergebnis:</label>
         <div>

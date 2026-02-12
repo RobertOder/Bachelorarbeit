@@ -43,7 +43,6 @@ public class NewReceiptCopyState implements ReceiptCopyState {
         // Categorized
         Household household = expenditureOfReceipt.getAccount().getHousehold();
         String posibleCategories = receiptCopyService.processFindCategory(receiptCopy, household);
-        System.out.println("HAUSHALT !!!!!!!!!!!!!!: " + household.getName());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             JsonNode rootNode = objectMapper.readTree(posibleCategories);

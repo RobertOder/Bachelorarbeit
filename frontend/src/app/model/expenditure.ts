@@ -8,6 +8,7 @@ export class Expenditure {
     description!: string;
     article!: string[];
     date!: Date;
+    dateString!: string;
     amount!: number;
     currency!: string;
     recurring!: boolean;

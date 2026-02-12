@@ -137,7 +137,6 @@ public class ReceiptCopyService {
     public String processFindCategory(ReceiptCopy receiptCopy, Household household) {
         String url = "http://localhost:11434/api/generate";
         String posibleCategories = new String();
-        if (receiptCopy.getStatus() == ReceiptCopyStatus.NEW) {
             if (household != null) {
                 List<ExpenditureCategory> expenditureCategoryList = householdService.getExpenditureCategories(household.getId());
                 List<String> expenditureCategories = new ArrayList<>();
@@ -189,9 +188,6 @@ public class ReceiptCopyService {
                     logger.error(ex.getMessage());
                 }
             }
-        } else {
-            logger.warn("Service: Cant generate Categories, because Status of receiptCopy is not NEW");
-        }
         return posibleCategories;
     }
 }

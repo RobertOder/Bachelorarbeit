@@ -69,6 +69,11 @@ export class ExpenditureComponent {
       const dataURL: string = this.selectedFileView;
       this.selectedFile = await this.dataURLtoFile(dataURL, "recognizedDocument.png");
     }
+    if (this.expenditure.date) {
+      this.expenditure.dateString = this.expenditure.date.toString().split('T')[0];
+    } else {
+      this.expenditure.dateString = new Date().toISOString().split('T')[0];
+    }
   }
 
   async dataURLtoFile(dataUrl: string, filename: string): Promise<File> {
@@ -106,7 +111,7 @@ export class ExpenditureComponent {
     if (this.expenditure.date == null) {
       toSavedExpenditure.date = new Date();
     }else{
-      toSavedExpenditure.date = this.expenditure.date;
+      toSavedExpenditure.date = new Date(this.expenditure.dateString);
     }
     toSavedExpenditure.amount = this.expenditure.amount;
     this.expenditure.currency = 'EUR';
