@@ -21,7 +21,7 @@ export class ExpenditureCategoryComponent {
   @Input() expenditureCategory!: ExpenditureCategory;
   // myVar: any;
   households: Household[] = [];
-  currentExpendituresSum: { [key: number]: string } = {};
+  currentExpendituresSum: { [key: number]: string[] } = {};
   diagramColors = [
     'red',
     'green',
@@ -51,7 +51,10 @@ export class ExpenditureCategoryComponent {
       this.households.forEach(household => {
         household.expenditureCategories.forEach(category => {
           this.expenditureCategoryService.getExpenditureSum(category.id).subscribe(amount => {
-            this.currentExpendituresSum[category.id] = amount;
+            let amountAndColor: string[] = [];
+            amountAndColor.push(amount);
+            amountAndColor.push(this.diagramColors[category.id % this.diagramColors.length]);
+            this.currentExpendituresSum[category.id] = amountAndColor;
           });
         });
       });
@@ -76,15 +79,15 @@ export class ExpenditureCategoryComponent {
     }
 
   getCurrentMonth(categoryId: number): string {
-    return this.currentExpendituresSum[categoryId] !== undefined
-      ? this.currentExpendituresSum[categoryId]
+    return this.currentExpendituresSum[categoryId]?.[0] !== undefined
+      ? this.currentExpendituresSum[categoryId][0]
       : 'Lädt...';
   }
 
   getDiagramBackground(expenditureCategories: ExpenditureCategory[]): string {
     let total = 0;
     for (const expCat of expenditureCategories) {
-      total += Number(this.currentExpendituresSum[expCat.id]);
+      total += Number(this.currentExpendituresSum[expCat.id][0]);
     }
     console.log("total: " + total);
     let calc = 0;
@@ -92,15 +95,20 @@ export class ExpenditureCategoryComponent {
     for (let i = 0; i < expenditureCategories.length; i++) {
       const expCat = expenditureCategories[i];
       const start = (calc / total) * 100;
-      calc += Number(this.currentExpendituresSum[expCat.id]);
+      calc += Number(this.currentExpendituresSum[expCat.id][0]);
       const end = (calc / total) * 100;
 
-      const color = this.diagramColors[i % this.diagramColors.length];
+      const color = this.currentExpendituresSum[expCat.id][1];
 
       parts.push(`${color} ${start}% ${end}%`);
     }
 
     return `conic-gradient(${parts.join(', ')})`;
+  }
+
+  getLegendColor(expCat: ExpenditureCategory): string {
+    const color = this.currentExpendituresSum[expCat.id][1];
+    return color;
   }
 
 }

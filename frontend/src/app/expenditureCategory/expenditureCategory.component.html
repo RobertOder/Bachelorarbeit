@@ -14,7 +14,7 @@
           </div>
           <div>
             <label for="household">Gehört zu welchem Haushalt: </label>
-            <select #householdSelectId >
+            <select id="household" #householdSelectId >
               <option *ngFor="let household of households" [value]="household.id">
                   {{household.id}} - {{household.name}}
               </option>
@@ -52,7 +52,7 @@
             <tbody *ngFor="let myHousehold of households">
                 <tr *ngFor="let myCategory of myHousehold.expenditureCategories">
                   <td class="hide-mobile">{{myCategory.id}}</td>
-                  <td>{{myCategory.name}}</td>
+                  <td><span class="legend" [style.background]="getLegendColor(myCategory)"></span>{{myCategory.name}}</td>
                   <td class="text-center">{{myCategory.upperLimit}}€</td>
                   <td class="text-center">{{getCurrentMonth(myCategory.id)}}€</td>
                   <td>{{myHousehold.name}}</td>

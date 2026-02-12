@@ -291,6 +291,14 @@ input:valid:not([type=submit]){
   margin-bottom: 5%;
 }
 
+.legend {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
 /* ------ Media-Querry fuer besonders schmale Displays ------ */
 @media screen and (max-device-width: 480px) {
 
