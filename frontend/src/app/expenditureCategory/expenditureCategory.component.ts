@@ -34,6 +34,9 @@ export class ExpenditureCategoryComponent {
     'purple',
     'teal'
   ];
+  actualYear: number = new Date().getFullYear();
+  actualMonth: number = new Date().getMonth() +1;
+  monthYear: string = this.actualMonth.toString().padStart(2, '0') + " / " + this.actualYear;
 
   constructor(private householdMemberService: HouseholdMemberService, private householdService: HouseholdService, private expenditureCategoryService: ExpenditureCategoryService) {
     this.householdMember = history.state;

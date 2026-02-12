@@ -37,7 +37,7 @@
               </div>
               <div>
                 <label for="expenditureCategory">Kategorie: </label>
-                <select [disabled]="selectedFileView !== null" id="expenditureCategory">
+                <select id="expenditureCategory">
                   <option value="">0 - Zuerst Konto wählen...</option>
                   <option *ngFor="let expenditureCategory of expenditureCategories" [value]="expenditureCategory.id" [selected]="selectedExpenditureCategoryId === expenditureCategory.id">
                       {{expenditureCategory.id}} - {{expenditureCategory.name}}
@@ -78,18 +78,20 @@
         </span>
         <div>
           <button type="button" class="button-right" title="Fotokopie löschen" (click)="deleteReceiptCopy(receiptCopy)">Fotokopie löschen</button>
-          <button type="button" class="button-left" title="Inhalte auslesen" (click)="translateReceiptCopy(receiptCopy)">Inhalte Auslesen</button>
         </div>
         <label for="ocr-textfield-{{receiptCopy.id}}" class="textfieldlabel">OCR-Ergebnis:</label>
         <div>
           <textarea id="ocr-textfield-{{receiptCopy.id}}" class="textfield" readonly>{{receiptCopy.translation}}</textarea>
         </div>
         <div>
-          <button type="button" class="button-left" title="KI Kategorien generieren" (click)="categorizeReceiptCopy(receiptCopy)">KI Kategorien generieren</button>
+          <button type="button" class="button-left" title="Inhalte aus Fotokopie auslesen" (click)="translateReceiptCopy(receiptCopy)">1. Inhalte aus Fotokopie auslesen</button>
         </div>
         <label for="categorie-textfield-{{receiptCopy.id}}" class="textfieldlabel">KI Kategorie-Vorschlag:</label>
         <div>
           <textarea id="categorie-textfield-{{receiptCopy.id}}" class="textfield" readonly></textarea>
+        </div>
+        <div>
+          <button type="button" class="button-left" title="KI Kategorien generieren" (click)="categorizeReceiptCopy(receiptCopy)">2. KI Kategorien generieren</button>
         </div>
       </div>
     </article>

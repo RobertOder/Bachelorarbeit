@@ -28,7 +28,7 @@
       </form>
     </article>
     <article>
-      <h2>Aktuelle Verteilung der Ausgaben</h2>
+      <h2>Verteilung der Ausgaben im Monat {{monthYear}}</h2>
         <div *ngFor="let myHousehold of households">
           <h3>Haushalt > {{myHousehold.name}}</h3>
             <div class="diagram" [style.background]="getDiagramBackground(myHousehold.expenditureCategories)">

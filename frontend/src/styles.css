@@ -174,7 +174,7 @@ a[href="#top"] {
 
 table {
   border-spacing: 0;
-  line-height: 175%;
+  line-height: 200%;
   width: 100%
 }
 
@@ -288,7 +288,8 @@ input:valid:not([type=submit]){
   height: 200px;
   z-index: 2;
   margin-left: calc((100% - 200px) / 2);
-  margin-bottom: 5%;
+  margin-top: 5%;
+  margin-bottom: 10%;
 }
 
 .legend {
