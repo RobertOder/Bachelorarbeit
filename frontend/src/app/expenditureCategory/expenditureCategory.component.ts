@@ -90,28 +90,36 @@ export class ExpenditureCategoryComponent {
   getDiagramBackground(expenditureCategories: ExpenditureCategory[]): string {
     let total = 0;
     for (const expCat of expenditureCategories) {
-      total += Number(this.currentExpendituresSum[expCat.id][0]);
+      if (this.currentExpendituresSum[expCat.id]) { // Erst wenn OnInit durch ist
+        total += Number(this.currentExpendituresSum[expCat.id][0]);
+      }
     }
     console.log("total: " + total);
     let calc = 0;
     const parts: string[] = [];
     for (let i = 0; i < expenditureCategories.length; i++) {
       const expCat = expenditureCategories[i];
-      const start = (calc / total) * 100;
-      calc += Number(this.currentExpendituresSum[expCat.id][0]);
-      const end = (calc / total) * 100;
+      if (this.currentExpendituresSum[expCat.id]) { // Erst wenn OnInit durch ist
+        const start = (calc / total) * 100;
+        calc += Number(this.currentExpendituresSum[expCat.id][0]);
+        const end = (calc / total) * 100;
 
-      const color = this.currentExpendituresSum[expCat.id][1];
+        const color = this.currentExpendituresSum[expCat.id][1];
 
-      parts.push(`${color} ${start}% ${end}%`);
+        parts.push(`${color} ${start}% ${end}%`);
+      }
     }
 
     return `conic-gradient(${parts.join(', ')})`;
   }
 
   getLegendColor(expCat: ExpenditureCategory): string {
-    const color = this.currentExpendituresSum[expCat.id][1];
+    let color = "black";
+    if (this.currentExpendituresSum[expCat.id]) { // Erst wenn OnInit durch ist
+      color = this.currentExpendituresSum[expCat.id][1];
+    }
     return color;
   }
 
+  protected readonly Number = Number;
 }

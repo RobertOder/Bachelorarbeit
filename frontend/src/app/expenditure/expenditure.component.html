@@ -11,10 +11,12 @@
               <div>
                 <label for="amount">Ausgabe in €: </label>
                 <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="z.B. 12.50" tabindex="2" required [(ngModel)]="expenditure.amount">
+                <div class="message" id="message_amount">Ausgabe zunächst erforderlich!</div>
               </div>
               <div>
                 <label for="description">Beschreibung: </label>
                 <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="z.B. Parkticket" tabindex="3" required [(ngModel)]="expenditure.description">
+                <div class="message" id="message_amount">Ausgabe zunächst erforderlich!</div>
               </div>
               <div>
                 <label for="receiptCopy">Fotokopie hochladen: </label>
@@ -46,11 +48,13 @@
               </div>
               <div>
                 <label for="article">Artikel:</label>
-                <ul>
-                  <li *ngFor="let article of expenditure.article">
-                    {{ article }}
-                  </li>
-                </ul>
+                <div>
+                  <ul>
+                    <li *ngFor="let article of expenditure.article">
+                      {{ article }}
+                    </li>
+                  </ul>
+                </div>
               </div>
             </fieldset>
             <div>

@@ -283,7 +283,7 @@ input:valid:not([type=submit]){
     yellow 70% 100%
   );*/
   border-radius: 50%;
-  mask: radial-gradient(transparent 55%, black 56%);
+  mask: radial-gradient(transparent 50%, black 51%);
   width: 200px;
   height: 200px;
   z-index: 2;
@@ -298,6 +298,26 @@ input:valid:not([type=submit]){
   height: 15px;
   margin-top: 10px;
   margin-right: 5px;
+  border-radius: 15px;
+}
+
+main > div {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 3fr;
+  column-gap: 1%;
+  max-width: 75rem;
+  min-width: 0;
+}
+
+main > div > article {
+  margin: 0;
+  min-width: 0;
+  padding: 30px;
+}
+
+main > div > article:nth-of-type(1) {
+  margin-top: 0;
+  margin-right: 2%;
 }
 
 /* ------ Media-Querry fuer besonders schmale Displays ------ */
@@ -317,14 +337,18 @@ input:valid:not([type=submit]){
   }
 
   /* --- Layout auf Block umstellen, damit alle inhalte untereinander angezeigt werden --- */
-  main {
+  main,
+  main > div{
     display: block;
   }
 
-  article {
+  article,
+  main > div > article {
+    margin: 0;
     max-width: 98%;
     min-width: 0;
     padding-bottom: 2rem;
+    margin-bottom: 2%;
   }
 
   /* --- Formulare anpassen --- */
