@@ -5,6 +5,7 @@ export class Income {
 
     description!: string;
     date!: Date;
+    dateString!: string;
     amount!: number;
     currency!: string;
     recurring!: boolean;
@@ -20,5 +21,5 @@ export class Income {
 
     public toString(): string {
         return this.id + ', ' + this.description.toString();
-    }    
+    }
 }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,8 +106,11 @@ public class AccountService {
             logger.error("Service: Saving income failed, no such account with id " + id);
             throw new RuntimeException("Saving income failed, no such account with id " + id);
         }
-        Income savedIncome = null;
         income.setAccount(account);
+        Income savedIncome = null;
+        if (income.getAmount() == null) {
+            income.setAmount(new BigDecimal(0));
+        }
         savedIncome = incomeRepo.save(income);
         if (savedIncome == null) {
             logger.error("Service: Income for account could not be saved");
@@ -141,6 +145,9 @@ public class AccountService {
         }
         Expenditure savedExpenditure = null;
         expenditure.setAccount(account);
+        if (expenditure.getAmount() == null) {
+            expenditure.setAmount(new BigDecimal(0));
+        }
         savedExpenditure = expenditureRepo.save(expenditure);
         if (savedExpenditure == null) {
             logger.error("Service: Expenditure for account could not be saved");

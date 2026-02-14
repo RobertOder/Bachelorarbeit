@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,6 +115,9 @@ public class HouseholdService {
             throw new RuntimeException("Saving expenditureCategory failed, no such household with id " + id);
         }
         expenditureCategory.setHousehold(household);
+        if (expenditureCategory.getUpperLimit() == null) {
+            expenditureCategory.setUpperLimit(new BigDecimal(0));
+        }
         ExpenditureCategory savedExpenditureCategory = expenditureCategoryRepo.save(expenditureCategory);
         if (savedExpenditureCategory == null) {
             logger.error("Service: Saving expenditureCategory failed");

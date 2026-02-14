@@ -24,13 +24,18 @@ export class IncomeComponent {
   accounts: Account[] = [];
   households: Household[] = [];
 
-  constructor(private householdMemberService: HouseholdMemberService, private accountService: AccountService, private router: Router) { 
+  constructor(private householdMemberService: HouseholdMemberService, private accountService: AccountService, private router: Router) {
     this.householdMember = history.state;
   }
-  
+
   ngOnInit(): void {
     this.income = new Income();
     this.getAccounts();
+    if (this.income.date) {
+      this.income.dateString = this.income.date.toString().split('T')[0];
+    } else {
+      this.income.dateString = new Date().toISOString().split('T')[0];
+    }
   }
 
   getAccounts(): void {
@@ -46,7 +51,7 @@ export class IncomeComponent {
   add(income: Income, accountId: string): void {
     income.currency = 'EUR';
     income.recurring = false;
-    income.date = new Date();
+    income.date = new Date(this.income.dateString);
     this.accountService.addIncome(Number(accountId), income).subscribe(tmp => {
       this.router.navigate(['home-component']);
     });

@@ -11,12 +11,10 @@
               <div>
                 <label for="amount">Ausgabe in €: </label>
                 <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="z.B. 12.50" tabindex="2" required [(ngModel)]="expenditure.amount">
-                <div class="message" id="message_amount">Ausgabe zunächst erforderlich!</div>
               </div>
               <div>
                 <label for="description">Beschreibung: </label>
                 <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="z.B. Parkticket" tabindex="3" required [(ngModel)]="expenditure.description">
-                <div class="message" id="message_amount">Ausgabe zunächst erforderlich!</div>
               </div>
               <div>
                 <label for="receiptCopy">Fotokopie hochladen: </label>
@@ -27,7 +25,7 @@
                 <button [disabled]="selectedFileView !== null" type="button" id="documentRecognizer" title="documentRecognizer" (click)="documentRecognizer(householdMember, expenditure)">Dokument erfassen</button>
               </div>
               <div>
-                <label for="account">Auf Konto buchen: </label>
+                <label for="account">Auf Konto buchen * : </label>
                 <select id="account" required (change)="updateExpenditureCategories()">
                   <option value="">0 - Bitte das zu belastende Konto wählen...</option>
                   <ng-container *ngFor="let account of accounts">
@@ -59,7 +57,7 @@
             </fieldset>
             <div>
                 <input type="reset">
-                <input type="submit" id="submit" (click)="add()">
+                <input type="submit" id="submit" (click)="add($event)">
             </div>
           </form>
     </article>
@@ -88,14 +86,14 @@
           <textarea id="ocr-textfield-{{receiptCopy.id}}" class="textfield" readonly>{{receiptCopy.translation}}</textarea>
         </div>
         <div>
-          <button type="button" class="button-left" title="Inhalte aus Fotokopie auslesen" (click)="translateReceiptCopy(receiptCopy)">1. Inhalte aus Fotokopie auslesen</button>
+          <button type="button" class="button-left" title="Inhalte aus Fotokopie auslesen" (click)="translateReceiptCopy(receiptCopy)"><span *ngIf="loadingTranslate" class="loading"></span> 1. Inhalte aus Fotokopie auslesen <span *ngIf="loadingTranslate" class="loading"></span></button>
         </div>
         <label for="categorie-textfield-{{receiptCopy.id}}" class="textfieldlabel">KI Kategorie-Vorschlag:</label>
         <div>
           <textarea id="categorie-textfield-{{receiptCopy.id}}" class="textfield" readonly></textarea>
         </div>
         <div>
-          <button type="button" class="button-left" title="KI Kategorien generieren" (click)="categorizeReceiptCopy(receiptCopy)">2. KI Kategorien generieren</button>
+          <button type="button" class="button-left" title="KI Kategorien generieren" (click)="categorizeReceiptCopy(receiptCopy)"><span *ngIf="loadingCategory" class="loading"></span> 2. KI Kategorien generieren <span *ngIf="loadingCategory" class="loading"></span></button>
         </div>
       </div>
     </article>

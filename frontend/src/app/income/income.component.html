@@ -5,12 +5,16 @@
             <fieldset>
               <legend>Einnahme anlegen</legend>
               <div>
+                <label for="date">Datum: </label>
+                <input type="date" id="date" name="date" tabindex="1" required [(ngModel)]="income.dateString">
+              </div>
+              <div>
                 <label for="amount">Einnahme in €: </label>
-                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="1" required [(ngModel)]="income.amount">
+                <input type="text" id="amount" name="amount" pattern="^\d+(\.\d{1,2})?$" size="30" maxlength="30" placeholder="12.50" tabindex="2" required [(ngModel)]="income.amount">
               </div>
               <div>
                 <label for="description">Beschreibung: </label>
-                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Taschendgeld" tabindex="2" required [(ngModel)]="income.description">
+                <input type="text" id="description" name="description" size="30" maxlength="30" placeholder="Taschendgeld" tabindex="3" required [(ngModel)]="income.description">
               </div>
               <div>
                 <label for="household">Auf Konto buchen: </label>

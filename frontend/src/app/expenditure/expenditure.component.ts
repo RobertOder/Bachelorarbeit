@@ -33,7 +33,9 @@ export class ExpenditureComponent {
   selectedFileView: string | null = null;
   selectedAccountId: number | null = null;
   selectedExpenditureCategoryId: number | null = null;
-  receiptImageUrls: { [id: number]: string } = {}; // Speichert die Bild-URLs mit ID als Schlüssel
+  receiptImageUrls: { [id: number]: string } = {}; // Speichert die Bild-URLs mit ID als Schluessel
+  loadingTranslate = false;
+  loadingCategory = false;
 
   constructor(private householdMemberService: HouseholdMemberService,
               private accountService: AccountService,
@@ -101,27 +103,54 @@ export class ExpenditureComponent {
     });
   }
 
-  add(): void {
-    var toSavedExpenditure: Expenditure = {} as Expenditure;
-    var accountId = document.getElementById("account") as HTMLSelectElement;
-    var expenditureCategoryId = document.getElementById("expenditureCategory") as HTMLSelectElement;
-
-    toSavedExpenditure.id = this.expenditure.id;
-    toSavedExpenditure.description = this.expenditure.description;
-    if (this.expenditure.date == null) {
-      toSavedExpenditure.date = new Date();
-    }else{
-      toSavedExpenditure.date = new Date(this.expenditure.dateString);
+  validate(): boolean {
+    let accountId = document.getElementById("account") as HTMLSelectElement;
+    let parent = accountId?.parentNode;
+    if(!accountId.value){
+      if (parent?.lastChild != null) {
+        if (parent.lastChild.nodeName.toLowerCase() !== "div") {
+          // Element erzeugen
+          let div = document.createElement("div");
+          // Die Attribute class und id setzen
+          div.setAttribute("class", "message");
+          div.setAttribute("id", accountId.id + "_err");
+          // Element mit Inhalt (Text) befuellen
+          let message = document.createTextNode("Bitte Konto wählen");
+          // Kindelement platzieren
+          div.appendChild(message);
+          // Fertiges Element in den DOM-Baum einfuegen
+          parent.appendChild(div);
+        }
+      }
+      return false;
     }
-    toSavedExpenditure.amount = this.expenditure.amount;
-    this.expenditure.currency = 'EUR';
-    this.expenditure.recurring = false;
-    this.expenditureService.removeRecognizedDocument();
-    this.accountService.addExpenditure(Number(accountId.value), toSavedExpenditure, this.selectedFile).subscribe(expenditure => {
-      this.expenditureService.assignCategory(expenditure.id , Number(expenditureCategoryId.value)).subscribe( tmp => {
-        this.router.navigate(['home-component']);
+    else{
+      return true;
+    }
+  }
+
+  add(event: Event): void {
+    if (!this.validate()) {
+      // Neuladen der Seite verhindern
+      event.preventDefault();
+    } else {
+      var toSavedExpenditure: Expenditure = {} as Expenditure;
+      var accountId = document.getElementById("account") as HTMLSelectElement;
+      var expenditureCategoryId = document.getElementById("expenditureCategory") as HTMLSelectElement;
+
+      toSavedExpenditure.id = this.expenditure.id;
+      toSavedExpenditure.description = this.expenditure.description;
+      toSavedExpenditure.date = new Date(this.expenditure.dateString);
+      toSavedExpenditure.amount = this.expenditure.amount;
+      this.expenditure.currency = 'EUR';
+      this.expenditure.recurring = false;
+      this.expenditureService.removeRecognizedDocument();
+      this.accountService.addExpenditure(Number(accountId.value), toSavedExpenditure, this.selectedFile).subscribe(expenditure => {
+        this.expenditureService.assignCategory(expenditure.id, Number(expenditureCategoryId.value)).subscribe(tmp => {
+          this.router.navigate(['home-component']);
+        });
       });
-    });
+    }
   }
 
   updateExpenditureCategories(): void {
@@ -158,16 +187,22 @@ export class ExpenditureComponent {
   }
 
   translateReceiptCopy(receiptCopy: ReceiptCopy): void {
-    this.receiptCopyService.translateReceiptCopy(receiptCopy.id).subscribe( tmp => {
-      const textfield = document.getElementById('ocr-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
-      if (textfield) {
-        textfield.value = tmp;
+    this.loadingTranslate = true;
+    this.receiptCopyService.translateReceiptCopy(receiptCopy.id).subscribe({
+      next: (tmp) => {
+        const textfield = document.getElementById('ocr-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
+        if (textfield) {
+          textfield.value = tmp;
+        }
+        this.router.navigate(['home-component']);
+      }, complete: () => {
+        this.loadingTranslate = false;
       }
-      this.router.navigate(['home-component']);
-  });
+    });
   }
 
   categorizeReceiptCopy(receiptCopy: ReceiptCopy): void {
+    this.loadingCategory = true;
     var accountId = document.getElementById("account") as HTMLSelectElement;
     var searchedAccountId = Number(accountId.value);
     if (this.selectedAccountId) {
@@ -175,12 +210,16 @@ export class ExpenditureComponent {
     }
     this.accountService.getHousehold(searchedAccountId)
       .subscribe(household => {
-        this.receiptCopyService.categorizeReceiptCopy(receiptCopy.id, household.id).subscribe( tmp => {
-          const textfield = document.getElementById('categorie-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
-          if (textfield) {
-            textfield.value = tmp;
+        this.receiptCopyService.categorizeReceiptCopy(receiptCopy.id, household.id).subscribe({
+          next: (tmp) => {
+            const textfield = document.getElementById('categorie-textfield-' + receiptCopy.id) as HTMLTextAreaElement;
+            if (textfield) {
+              textfield.value = tmp;
+            }
+            //this.router.navigate(['home-component']);
+          }, complete: () => {
+            this.loadingCategory = false;
           }
-          //this.router.navigate(['home-component']);
         });
       });
   }
